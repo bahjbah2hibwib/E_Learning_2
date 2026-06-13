@@ -1,0 +1,38 @@
+# General
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Custom ignored folder requested by user
+contect/
+
+# Backend (Spring Boot)
+elearning/target/
+elearning/logs/
+elearning/*.log
+elearning/.settings/
+elearning/.springBeans
+elearning/.classpath
+elearning/.project
+
+# Frontend (React)
+elearning_FE/node_modules/
+elearning_FE/build/
+elearning_FE/dist/
+elearning_FE/coverage/
+elearning_FE/.npm/
+elearning_FE/.eslintcache
+elearning_FE/.env.local
+elearning_FE/.env.development.local
+elearning_FE/.env.test.local
+elearning_FE/.env.production.local
+
+# Docker (Optional)
+# If you have local volume data you want to ignore, add them here
+# mysql_data/
+# minio_data/
