@@ -431,7 +431,6 @@ public class UserServiceImpl implements UserService {
         // Verify enrollment
         com.example.elearning.model.Enrollment enrollment = enrollmentRepository.findByStudent_UserIdAndCourse_CourseId(userId, courseId)
                 .orElseThrow(() -> new com.example.elearning.exception.AccessDeniedException("Bạn chưa đăng ký khóa học này", "NOT_ENROLLED"));
-
         // Get Course Curriculum
         com.example.elearning.dto.response.CourseAdminDetailResponseDto courseDetail = courseService.getPublicCourseDetail(courseId);
 

@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
-import { Typography, Collapse, List, Tag, Empty, Space, Tooltip, Modal, Button } from 'antd';
-import { PlayCircleOutlined, FileTextOutlined, VideoCameraOutlined, FilePdfOutlined, FormOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Typography, Collapse, List, Tag, Empty, Space, Modal, Button, Row, Col } from 'antd';
+import { 
+  PlayCircleOutlined, 
+  FileTextOutlined, 
+  VideoCameraOutlined, 
+  FilePdfOutlined, 
+  FormOutlined, 
+  ClockCircleOutlined,
+  FolderOpenOutlined,
+  DownloadOutlined
+} from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
 
 const CourseCurriculum = ({ curriculum }) => {
-  const [previewModal, setPreviewModal] = useState({ visible: false, type: '', title: '', data: null });
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
-  const openPreview = (type, lessonTitle, data) => {
-    setPreviewModal({ visible: true, type, title: lessonTitle, data });
+  const openLessonDetail = (lesson) => {
+    setSelectedLesson(lesson);
   };
 
-  const closePreview = () => {
-    setPreviewModal({ visible: false, type: '', title: '', data: null });
+  const closeLessonDetail = () => {
+    setSelectedLesson(null);
   };
 
   if (!curriculum || curriculum.length === 0) {
@@ -23,6 +32,177 @@ const CourseCurriculum = ({ curriculum }) => {
       </div>
     );
   }
+
+  const renderLessonContent = () => {
+    if (!selectedLesson) return null;
+
+    return (
+      <div style={{ padding: '8px 0' }}>
+        <Row gutter={[32, 24]}>
+          {/* CỘT TRÁI: VIDEO VÀ BÀI TẬP */}
+          <Col xs={24} lg={17}>
+            {/* Video Player Area */}
+            <div style={{ 
+              background: '#0f172a', 
+              borderRadius: '12px', 
+              overflow: 'hidden', 
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              aspectRatio: '16/9',
+              position: 'relative',
+              marginBottom: '32px'
+            }}>
+              {selectedLesson.videos && selectedLesson.videos.length > 0 ? (
+                <video 
+                  src={selectedLesson.videos[0].videoUrl?.startsWith('http') ? selectedLesson.videos[0].videoUrl : `http://localhost:9000/elearning/${selectedLesson.videos[0].videoUrl}`}
+                  controls 
+                  controlsList="nodownload"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b' }}>
+                  <VideoCameraOutlined style={{ fontSize: '48px', opacity: 0.3, marginBottom: '16px' }} />
+                  <Text style={{ color: '#94a3b8', fontSize: '16px' }}>Bài học này không có Video</Text>
+                </div>
+              )}
+            </div>
+
+            {/* Quizzes Area */}
+            <div>
+              <Title level={4} style={{ color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FormOutlined style={{ color: '#8b5cf6' }} /> Bài tập thực hành
+              </Title>
+              
+              {selectedLesson.quizzes && selectedLesson.quizzes.length > 0 ? selectedLesson.quizzes.map((quiz, idx) => (
+                <div key={idx} style={{ 
+                  background: '#fff', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: '12px', 
+                  padding: '24px',
+                  marginBottom: '20px',
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                }}>
+                  <Title level={5} style={{ color: '#334155', marginBottom: '24px' }}>{quiz.title}</Title>
+                  {quiz.questions && quiz.questions.map((question, qIdx) => (
+                    <div key={qIdx} style={{ marginBottom: qIdx === quiz.questions.length - 1 ? 0 : '32px' }}>
+                      <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                        <div style={{ background: '#f8fafc', color: '#475569', fontWeight: 'bold', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #e2e8f0' }}>
+                          {qIdx + 1}
+                        </div>
+                        <Text style={{ fontSize: '15px', color: '#1e293b', fontWeight: 500, marginTop: '4px' }}>{question.questionText}</Text>
+                      </div>
+                      <div style={{ paddingLeft: '48px' }}>
+                        <Row gutter={[12, 12]}>
+                          {question.answers && question.answers.map((answer, aIdx) => (
+                            <Col span={24} sm={12} key={aIdx}>
+                              <div style={{ 
+                                padding: '12px 16px', 
+                                background: '#f8fafc', 
+                                border: '1px solid #e2e8f0', 
+                                borderRadius: '8px',
+                                display: 'flex',
+                                gap: '12px',
+                                transition: 'all 0.2s',
+                                cursor: 'default'
+                              }}
+                              onMouseOver={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; }}
+                              onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                              >
+                                <div style={{ color: '#64748b', fontWeight: 600 }}>{String.fromCharCode(65 + aIdx)}.</div>
+                                <Text style={{ color: '#334155' }}>{answer.answerText}</Text>
+                              </div>
+                            </Col>
+                          ))}
+                        </Row>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )) : (
+                <div style={{ background: '#f8fafc', padding: '32px', borderRadius: '12px', textAlign: 'center', border: '1px dashed #cbd5e1' }}>
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Bài học này chưa có bài tập trắc nghiệm" />
+                </div>
+              )}
+            </div>
+          </Col>
+
+          {/* CỘT PHẢI: TÀI LIỆU & THÔNG TIN */}
+          <Col xs={24} lg={7}>
+            <div style={{ position: 'sticky', top: '0' }}>
+              {/* Tài liệu đính kèm */}
+              <div style={{ 
+                background: '#f8fafc', 
+                borderRadius: '12px', 
+                padding: '24px', 
+                border: '1px solid #e2e8f0',
+                marginBottom: '24px'
+              }}>
+                <Title level={5} style={{ margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px', color: '#1e293b' }}>
+                  <FolderOpenOutlined style={{ color: '#3b82f6' }} /> Tài nguyên bài học
+                </Title>
+                
+                {selectedLesson.documents && selectedLesson.documents.length > 0 ? (
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={selectedLesson.documents}
+                    renderItem={(doc, idx) => {
+                      const docSrc = doc.fileUrl?.startsWith('http') ? doc.fileUrl : `http://localhost:9000/elearning/${doc.fileUrl}`;
+                      return (
+                        <List.Item 
+                          style={{ 
+                            padding: '12px', 
+                            background: '#fff', 
+                            borderRadius: '8px', 
+                            marginBottom: idx === selectedLesson.documents.length - 1 ? 0 : '12px', 
+                            border: '1px solid #e2e8f0',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseOver={e => e.currentTarget.style.borderColor = '#93c5fd'}
+                          onMouseOut={e => e.currentTarget.style.borderColor = '#e2e8f0'}
+                        >
+                          <List.Item.Meta
+                            avatar={<div style={{ width: '40px', height: '40px', background: '#fef2f2', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FilePdfOutlined style={{ fontSize: '20px', color: '#ef4444' }} /></div>}
+                            title={<Text style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }} ellipsis={{ tooltip: doc.fileName || doc.title }}>{doc.fileName || doc.title}</Text>}
+                            description={
+                              <a href={docSrc} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                                <DownloadOutlined /> Tải xuống
+                              </a>
+                            }
+                          />
+                        </List.Item>
+                      )
+                    }}
+                  />
+                ) : (
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<span style={{ color: '#94a3b8' }}>Không có tài liệu</span>} />
+                )}
+              </div>
+
+              {/* Thông tin tổng quan */}
+              <div style={{ padding: '0 8px' }}>
+                <Title level={5} style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px', textTransform: 'uppercase' }}>Thông tin tổng quan</Title>
+                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text type="secondary">Trạng thái:</Text>
+                    <Tag color={selectedLesson.isFreePreview ? 'green' : 'blue'} style={{ margin: 0, borderRadius: '4px', fontWeight: 500 }}>
+                      {selectedLesson.isFreePreview ? 'Học thử miễn phí' : 'Khóa'}
+                    </Tag>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text type="secondary">Thời lượng video:</Text>
+                    <Text strong style={{ color: '#334155' }}>{selectedLesson.duration || 0} phút</Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text type="secondary">Số lượng bài tập:</Text>
+                    <Text strong style={{ color: '#334155' }}>{selectedLesson.quizzes?.length || 0} bài</Text>
+                  </div>
+                </Space>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </div>
+    );
+  };
 
   return (
     <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', height: '100%' }}>
@@ -39,12 +219,23 @@ const CourseCurriculum = ({ curriculum }) => {
               itemLayout="horizontal"
               dataSource={section.lessons || []}
               renderItem={(lesson, lessonIdx) => (
-                <List.Item style={{ padding: '12px 16px', borderBottom: lessonIdx === section.lessons.length - 1 ? 'none' : '1px solid #f1f5f9' }}>
+                <List.Item 
+                  onClick={() => openLessonDetail(lesson)}
+                  style={{ 
+                    padding: '12px 16px', 
+                    borderBottom: lessonIdx === section.lessons.length - 1 ? 'none' : '1px solid #f1f5f9',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    borderRadius: '8px'
+                  }}
+                  onMouseOver={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
                   <List.Item.Meta
                     avatar={
                       lesson.type === 'VIDEO' ? 
-                        <PlayCircleOutlined style={{ color: '#3b82f6', fontSize: '20px' }} /> : 
-                        <FileTextOutlined style={{ color: '#10b981', fontSize: '20px' }} />
+                        <PlayCircleOutlined style={{ color: '#3b82f6', fontSize: '20px', marginTop: '4px' }} /> : 
+                        <FileTextOutlined style={{ color: '#10b981', fontSize: '20px', marginTop: '4px' }} />
                     }
                     title={
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
@@ -57,33 +248,16 @@ const CourseCurriculum = ({ curriculum }) => {
                       </div>
                     }
                     description={
-                      <Space size="large" style={{ marginTop: '4px' }}>
-                        <Tooltip title="Xem thử Video">
-                          <div style={{ cursor: 'pointer', padding: '4px', borderRadius: '4px', transition: 'background 0.3s' }} onClick={() => openPreview('VIDEO', lesson.title, lesson.videos)} onMouseOver={e => e.currentTarget.style.background = '#eff6ff'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                            <Space size={4} style={{ color: '#64748b', fontSize: '12px' }}>
-                              <VideoCameraOutlined style={{ color: '#3b82f6' }} /> {lesson.videoCount || 0} Video
-                            </Space>
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Xem trước tài liệu">
-                          <div style={{ cursor: 'pointer', padding: '4px', borderRadius: '4px', transition: 'background 0.3s' }} onClick={() => openPreview('DOC', lesson.title, lesson.documents)} onMouseOver={e => e.currentTarget.style.background = '#fef2f2'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                            <Space size={4} style={{ color: '#64748b', fontSize: '12px' }}>
-                              <FilePdfOutlined style={{ color: '#ef4444' }} /> {lesson.documentCount || 0} Tài liệu
-                            </Space>
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Làm thử bài tập">
-                          <div style={{ cursor: 'pointer', padding: '4px', borderRadius: '4px', transition: 'background 0.3s' }} onClick={() => openPreview('QUIZ', lesson.title, lesson.quizzes)} onMouseOver={e => e.currentTarget.style.background = '#f0fdf4'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                            <Space size={4} style={{ color: '#64748b', fontSize: '12px' }}>
-                              <FormOutlined style={{ color: '#10b981' }} /> {lesson.quizCount || 0} Bài tập
-                            </Space>
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Thời lượng ước tính">
-                          <Space size={4} style={{ color: '#64748b', fontSize: '12px' }}>
-                            <ClockCircleOutlined style={{ color: '#f59e0b' }} /> {lesson.duration || '15'} phút
-                          </Space>
-                        </Tooltip>
+                      <Space size="middle" style={{ marginTop: '4px' }}>
+                        <Space size={4} style={{ color: '#64748b', fontSize: '12px' }}>
+                          <VideoCameraOutlined style={{ color: '#3b82f6' }} /> {lesson.videoCount || 0} Video
+                        </Space>
+                        <Space size={4} style={{ color: '#64748b', fontSize: '12px' }}>
+                          <FilePdfOutlined style={{ color: '#ef4444' }} /> {lesson.documentCount || 0} Tài liệu
+                        </Space>
+                        <Space size={4} style={{ color: '#64748b', fontSize: '12px' }}>
+                          <FormOutlined style={{ color: '#10b981' }} /> {lesson.quizCount || 0} Bài tập
+                        </Space>
                       </Space>
                     }
                   />
@@ -96,95 +270,24 @@ const CourseCurriculum = ({ curriculum }) => {
 
       <Modal
         title={
-          <Space>
-            {previewModal.type === 'VIDEO' && <VideoCameraOutlined style={{ color: '#3b82f6' }} />}
-            {previewModal.type === 'DOC' && <FilePdfOutlined style={{ color: '#ef4444' }} />}
-            {previewModal.type === 'QUIZ' && <FormOutlined style={{ color: '#10b981' }} />}
-            <Text style={{ fontSize: '16px' }}>{previewModal.title}</Text>
-          </Space>
+          selectedLesson ? (
+            <div style={{ paddingBottom: '16px', borderBottom: '1px solid #f1f5f9', marginBottom: '8px', paddingTop: '8px' }}>
+              <Title level={3} style={{ margin: 0, color: '#0f172a' }}>
+                {selectedLesson.title}
+              </Title>
+            </div>
+          ) : 'Chi tiết bài học'
         }
-        open={previewModal.visible}
-        onCancel={closePreview}
-        footer={[
-          <Button key="close" onClick={closePreview} size="large">Đóng</Button>
-        ]}
-        width={700}
+        open={!!selectedLesson}
+        onCancel={closeLessonDetail}
+        footer={null}
+        width={1300}
         destroyOnClose
+        centered
+        bodyStyle={{ padding: '0 24px 24px 24px', maxHeight: '85vh', overflowY: 'auto', overflowX: 'hidden' }}
+        closeIcon={<div style={{ background: '#f1f5f9', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</div>}
       >
-        {previewModal.type === 'VIDEO' && (
-          <div>
-            {previewModal.data && previewModal.data.length > 0 ? previewModal.data.map((video, idx) => {
-              const videoSrc = video.videoUrl?.startsWith('http') ? video.videoUrl : `http://localhost:9000/elearning/${video.videoUrl}`;
-              return (
-                <div key={idx} style={{ marginBottom: '24px' }}>
-                  <Title level={5}>{video.title}</Title>
-                  <div style={{ background: '#0f172a', borderRadius: '8px', overflow: 'hidden', marginTop: '16px' }}>
-                    <video 
-                      src={videoSrc} 
-                      controls 
-                      autoPlay 
-                      style={{ width: '100%', display: 'block', maxHeight: '60vh' }}
-                    >
-                      Trình duyệt của bạn không hỗ trợ thẻ video.
-                    </video>
-                  </div>
-                </div>
-              );
-            }) : <Empty description="Chưa có video nào cho bài học này" />}
-          </div>
-        )}
-        
-        {previewModal.type === 'DOC' && (
-          <div>
-            {previewModal.data && previewModal.data.length > 0 ? previewModal.data.map((doc, idx) => {
-              const docSrc = doc.fileUrl?.startsWith('http') ? doc.fileUrl : `http://localhost:9000/elearning/${doc.fileUrl}`;
-              return (
-                <div key={idx} style={{ background: '#f8fafc', padding: '40px', borderRadius: '8px', border: '1px dashed #cbd5e1', textAlign: 'center', marginTop: '16px' }}>
-                  <FilePdfOutlined style={{ fontSize: '48px', color: '#ef4444', marginBottom: '16px' }} />
-                  <br />
-                  <Title level={5} style={{ margin: 0 }}>{doc.fileName || doc.title}</Title>
-                  <div style={{ marginTop: '24px' }}>
-                    <Button 
-                      type="primary" 
-                      size="large" 
-                      icon={<FilePdfOutlined />}
-                      href={docSrc}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Tải xuống tài liệu
-                    </Button>
-                  </div>
-                </div>
-              );
-            }) : <Empty description="Chưa có tài liệu đính kèm" />}
-          </div>
-        )}
-
-        {previewModal.type === 'QUIZ' && (
-          <div>
-            {previewModal.data && previewModal.data.length > 0 ? previewModal.data.map((quiz, idx) => (
-              <div key={idx} style={{ padding: '20px 0', marginTop: '8px', borderBottom: '1px solid #f1f5f9' }}>
-                <Title level={4} style={{ color: '#1e293b' }}>{quiz.title}</Title>
-                {quiz.questions && quiz.questions.map((question, qIdx) => (
-                  <div key={qIdx} style={{ marginBottom: '32px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                      <Tag color="blue">Câu {qIdx + 1}/{quiz.questions.length}</Tag>
-                    </div>
-                    <Title level={5} style={{ marginBottom: '24px' }}>{question.questionText}</Title>
-                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                      {question.answers && question.answers.map((answer, aIdx) => (
-                        <Button key={aIdx} block style={{ textAlign: 'left', padding: '16px', height: 'auto', borderRadius: '8px', borderColor: '#e2e8f0', display: 'flex', alignItems: 'flex-start' }}>
-                          <strong style={{ marginRight: '8px', color: '#3b82f6' }}>{String.fromCharCode(65 + aIdx)}.</strong> {answer.answerText}
-                        </Button>
-                      ))}
-                    </Space>
-                  </div>
-                ))}
-              </div>
-            )) : <Empty description="Chưa có bài tập nào" />}
-          </div>
-        )}
+        {renderLessonContent()}
       </Modal>
     </div>
   );

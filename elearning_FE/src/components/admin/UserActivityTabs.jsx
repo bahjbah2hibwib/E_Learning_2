@@ -74,7 +74,7 @@ const UserActivityTabs = ({ userData, activeTab, onTabChange, tabData, tabLoadin
   const renderContent = () => {
     const emptyDescription = (
       <span style={{ color: '#94a3b8' }}>
-        Đang chờ API {activeTab === 'courses' ? 'danh sách khóa học' : 'lịch sử giao dịch'} từ Backend...
+        Chưa có dữ liệu
       </span>
     );
 

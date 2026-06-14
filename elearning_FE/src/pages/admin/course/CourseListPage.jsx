@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Typography, Tabs, Row, Col, Spin, Pagination, message } from 'antd';
 import AdminLayout from '../../../layouts/AdminLayout';
-import CourseFilterBar from '../../../components/admin/course/CourseFilterBar';
 import CourseTable from '../../../components/admin/course/CourseTable';
 import ApprovalActionModal from '../../../components/admin/course/ApprovalActionModal';
 import courseService from '../../../services/courseService';
@@ -100,29 +99,8 @@ const CourseListPage = () => {
     navigate(`/admin/courses/${course.courseId}`);
   };
 
-  const handleSortNewest = () => {
-    const sorted = [...courseList].sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
-      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
-      return dateB - dateA;
-    });
-    setCourseList(sorted);
-    message.success('Đã sắp xếp các khóa học trên trang này theo mới nhất!');
-  };
-
   return (
     <AdminLayout>
-      <CourseFilterBar 
-        keyword={filters.keyword}
-        onKeywordChange={(val) => {
-          setFilters(prev => ({ ...prev, keyword: val }));
-          setPagination(prev => ({ ...prev, page: 0 }));
-        }}
-        totalElements={pagination.total}
-        onSortNewest={handleSortNewest}
-      />
-
-
       <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         <CourseTable 
           data={courseList}

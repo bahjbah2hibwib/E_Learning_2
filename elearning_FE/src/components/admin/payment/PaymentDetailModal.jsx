@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Tag, Typography, Spin, message } from 'antd';
+import { Modal, Tag, Typography, Spin, message, Row, Col, Space, Empty } from 'antd';
+import { 
+  CheckCircleOutlined, 
+  SyncOutlined, 
+  CloseCircleOutlined, 
+  UndoOutlined,
+  BankOutlined,
+  UserOutlined,
+  BookOutlined,
+  FileImageOutlined,
+  CalendarOutlined,
+  BarcodeOutlined,
+  CreditCardOutlined
+} from '@ant-design/icons';
 import paymentService from '../../../services/paymentService';
 
 const { Text, Title } = Typography;
@@ -7,94 +20,25 @@ const { Text, Title } = Typography;
 const getStatusTag = (status) => {
   switch (status) {
     case 'SUCCESS':
-      return <Tag color="success" style={{ borderRadius: '12px', padding: '2px 10px' }}>Thành công</Tag>;
+      return <Tag icon={<CheckCircleOutlined />} color="success" style={{ borderRadius: '16px', padding: '4px 12px', fontSize: '14px', margin: 0 }}>Thành công</Tag>;
     case 'PENDING':
-      return <Tag color="warning" style={{ borderRadius: '12px', padding: '2px 10px' }}>Chờ xử lý</Tag>;
+      return <Tag icon={<SyncOutlined spin />} color="processing" style={{ borderRadius: '16px', padding: '4px 12px', fontSize: '14px', margin: 0 }}>Chờ xử lý</Tag>;
     case 'FAILED':
-      return <Tag color="error" style={{ borderRadius: '12px', padding: '2px 10px' }}>Đã hủy</Tag>;
+      return <Tag icon={<CloseCircleOutlined />} color="error" style={{ borderRadius: '16px', padding: '4px 12px', fontSize: '14px', margin: 0 }}>Đã hủy</Tag>;
     case 'REFUNDED':
-      return <Tag color="default" style={{ borderRadius: '12px', padding: '2px 10px' }}>Hoàn tiền</Tag>;
+      return <Tag icon={<UndoOutlined />} color="default" style={{ borderRadius: '16px', padding: '4px 12px', fontSize: '14px', margin: 0 }}>Hoàn tiền</Tag>;
     default:
-      return <Tag color="default" style={{ borderRadius: '12px', padding: '2px 10px' }}>{status}</Tag>;
+      return <Tag color="default" style={{ borderRadius: '16px', padding: '4px 12px', fontSize: '14px', margin: 0 }}>{status}</Tag>;
   }
 };
 
 const formatDate = (dateStr) => {
   if (!dateStr) return 'N/A';
   const d = new Date(dateStr);
-  const date = d.toLocaleDateString('en-GB');
-  const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const date = d.toLocaleDateString('vi-VN');
+  const time = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   return `${time} - ${date}`;
 };
-
-// --- CÁC THÀNH PHẦN NGUYÊN TỬ (ATOMIC COMPONENTS) ---
-
-const DetailCell = ({ label, value, isFullWidth, hideRightBorder }) => (
-  <div style={{ 
-    display: 'flex', 
-    flex: isFullWidth ? '1 1 100%' : '1 1 50%',
-    width: isFullWidth ? '100%' : '50%',
-    borderRight: hideRightBorder || isFullWidth ? 'none' : '1px solid #f0f0f0'
-  }}>
-    <div style={{ 
-      width: '150px', 
-      minWidth: '150px',
-      backgroundColor: '#f8fafc', 
-      padding: '12px 16px',
-      fontWeight: 500,
-      color: '#1e293b',
-      borderRight: '1px solid #f0f0f0',
-      display: 'flex',
-      alignItems: 'center'
-    }}>
-      {label}
-    </div>
-    <div style={{ 
-      flex: 1, 
-      backgroundColor: '#fff', 
-      padding: '12px 16px',
-      color: '#334155',
-      display: 'flex',
-      alignItems: 'center',
-      wordBreak: 'break-word'
-    }}>
-      {value}
-    </div>
-  </div>
-);
-
-const DetailRow = ({ children, isLast }) => {
-  const childrenArray = React.Children.toArray(children);
-  return (
-    <div style={{ 
-      display: 'flex', 
-      width: '100%',
-      borderBottom: isLast ? 'none' : '1px solid #f0f0f0'
-    }}>
-      {childrenArray.map((child, index) => {
-        if (!React.isValidElement(child)) return child;
-        return React.cloneElement(child, {
-          hideRightBorder: index === childrenArray.length - 1
-        });
-      })}
-    </div>
-  );
-};
-
-const DetailTable = ({ title, children }) => (
-  <div style={{ marginBottom: 24 }}>
-    <Title level={5} style={{ color: '#1e293b', marginBottom: 16 }}>{title}</Title>
-    <div style={{
-      border: '1px solid #f0f0f0',
-      borderRadius: '8px',
-      overflow: 'hidden'
-    }}>
-      {children}
-    </div>
-  </div>
-);
-
-// ----------------------------------------------------
 
 const PaymentDetailModal = ({ visible, paymentId, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -123,176 +67,155 @@ const PaymentDetailModal = ({ visible, paymentId, onClose }) => {
     }
   };
 
+  const InfoRow = ({ icon, label, value, isHighlight = false }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px dashed #f1f5f9' }}>
+      <Space style={{ color: '#64748b' }}>
+        {icon}
+        <Text style={{ color: '#64748b' }}>{label}</Text>
+      </Space>
+      <div style={{ textAlign: 'right', maxWidth: '60%' }}>
+        {isHighlight ? (
+           <Text strong style={{ color: '#0ea5e9' }}>{value}</Text>
+        ) : (
+           <Text strong style={{ color: '#334155', wordBreak: 'break-word' }}>{value}</Text>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <Modal
-      title={<Title level={4} style={{ margin: 0 }}>Chi tiết giao dịch</Title>}
+      title={null}
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={550}
-      bodyStyle={{ padding: '24px 0 0' }}
+      width={900}
+      destroyOnClose
+      centered
+      bodyStyle={{ padding: 0, borderRadius: '16px', overflow: 'hidden' }}
+      closeIcon={<div style={{ background: '#f1f5f9', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '14px' }}>✕</div>}
     >
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+        <div style={{ textAlign: 'center', padding: '80px 0' }}>
           <Spin size="large" />
+          <div style={{ marginTop: '16px', color: '#64748b' }}>Đang tải dữ liệu...</div>
         </div>
       ) : detail ? (
         <div>
-          <DetailTable title="Thông tin giao dịch">
-            <DetailRow>
-              <DetailCell 
-                label="Mã giao dịch" 
-                value={<Text strong>{detail.transactionInfo?.transactionCode || 'N/A'}</Text>} 
-                isFullWidth 
-              />
-            </DetailRow>
-            <DetailRow>
-              <DetailCell 
-                label="Số tiền" 
-                value={
-                  <Text strong style={{ color: '#16a34a' }}>
-                    {detail.transactionInfo?.amount ? detail.transactionInfo.amount.toLocaleString() : 0} VNĐ
-                  </Text>
-                }
-                isFullWidth 
-              />
-            </DetailRow>
-            <DetailRow>
-              <DetailCell 
-                label="Phương thức" 
-                value={detail.transactionInfo?.paymentMethod || 'N/A'} 
-                isFullWidth
-              />
-            </DetailRow>
-            <DetailRow>
-              <DetailCell 
-                label="Trạng thái" 
-                value={getStatusTag(detail.transactionInfo?.paymentStatus)} 
-                isFullWidth
-              />
-            </DetailRow>
-            <DetailRow>
-              <DetailCell 
-                label="Ngày tạo" 
-                value={formatDate(detail.transactionInfo?.createdAt)} 
-                isFullWidth
-              />
-            </DetailRow>
-            <DetailRow>
-              <DetailCell 
-                label="Tài khoản nhận" 
-                value={
-                  <div>
-                    <Text strong>Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)</Text><br/>
-                    <Text>Số TK: <Text copyable style={{ color: '#0ea5e9', fontWeight: 500 }}>1903829128312</Text></Text><br/>
-                    <Text>Tên: CONG TY GIAO DUC EDUFLOW</Text>
+          {/* HEADER BIÊN LAI */}
+          <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', padding: '40px 32px 32px', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>
+            <Text style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase' }}>Biên lai thanh toán</Text>
+            <Title level={1} style={{ margin: '16px 0', color: '#16a34a', fontSize: '36px' }}>
+              {detail.transactionInfo?.amount ? detail.transactionInfo.amount.toLocaleString() : 0} <span style={{ fontSize: '24px' }}>VNĐ</span>
+            </Title>
+            <div>
+              {getStatusTag(detail.transactionInfo?.paymentStatus)}
+            </div>
+          </div>
+
+          <div style={{ padding: '32px' }}>
+            <Row gutter={48}>
+              {/* CỘT TRÁI: GIAO DỊCH & KHÓA HỌC */}
+              <Col xs={24} md={12}>
+                <div style={{ marginBottom: '32px' }}>
+                  <Title level={5} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', marginBottom: '20px' }}>
+                    <CreditCardOutlined style={{ color: '#3b82f6' }} /> Chi tiết thanh toán
+                  </Title>
+                  
+                  <InfoRow icon={<BarcodeOutlined />} label="Mã giao dịch" value={detail.transactionInfo?.transactionCode || 'N/A'} />
+                  <InfoRow icon={<CreditCardOutlined />} label="Phương thức" value={detail.transactionInfo?.paymentMethod || 'N/A'} />
+                  <InfoRow icon={<CalendarOutlined />} label="Ngày thực hiện" value={formatDate(detail.transactionInfo?.createdAt)} />
+                  <InfoRow icon={<BankOutlined />} label="Nội dung CK" value={`EDUFLOW ${detail.transactionInfo?.transactionCode || 'PAYMENT'} ${detail.studentInfo?.studentId || '1'}`} isHighlight />
+                </div>
+
+                <div>
+                  <Title level={5} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', marginBottom: '20px' }}>
+                    <BookOutlined style={{ color: '#8b5cf6' }} /> Thông tin khóa học
+                  </Title>
+                  <div style={{ background: '#f5f3ff', padding: '16px', borderRadius: '12px', border: '1px solid #ede9fe' }}>
+                    <Text strong style={{ fontSize: '15px', color: '#5b21b6', display: 'block', marginBottom: '4px' }}>{detail.courseInfo?.title || 'N/A'}</Text>
+                    <Text type="secondary" style={{ color: '#7c3aed' }}>Mã khóa học: #{detail.courseInfo?.courseId || 'N/A'}</Text>
                   </div>
-                } 
-                isFullWidth
-              />
-            </DetailRow>
-            <DetailRow>
-              <DetailCell 
-                label="Nội dung CK" 
-                value={<Text copyable style={{ color: '#0ea5e9' }}>EDUFLOW {detail.transactionInfo?.transactionCode || 'PAYMENT'} {detail.studentInfo?.studentId || '1'}</Text>} 
-                isFullWidth
-              />
-            </DetailRow>
-            <DetailRow isLast>
-              <DetailCell 
-                label="Ảnh hóa đơn (Bill)" 
-                value={
-                  <div style={{ padding: '8px 0' }}>
-                    <div style={{
-                      width: '120px', 
-                      height: '160px', 
-                      backgroundColor: '#f1f5f9', 
-                      border: '1px dashed #cbd5e1', 
-                      borderRadius: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: detail.transactionInfo?.billImageUrl ? 'pointer' : 'default',
-                      transition: 'border-color 0.3s',
-                      overflow: 'hidden'
-                    }}
-                    onMouseOver={e => { if (detail.transactionInfo?.billImageUrl) e.currentTarget.style.borderColor = '#3b82f6'; }}
-                    onMouseOut={e => { if (detail.transactionInfo?.billImageUrl) e.currentTarget.style.borderColor = '#cbd5e1'; }}
-                    onClick={() => {
-                        if (detail.transactionInfo?.billImageUrl) {
-                            window.open(detail.transactionInfo.billImageUrl, '_blank');
-                        }
-                    }}
-                    >
-                      {detail.transactionInfo?.billImageUrl ? (
-                        <img 
-                          onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/300?text=No+Bill+Image'; }}
-                          src={detail.transactionInfo.billImageUrl} 
-                          alt="Bill" 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
-                      ) : (
-                        <div style={{ textAlign: 'center', color: '#64748b' }}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '24px', height: '24px', margin: '0 auto 8px' }}>
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21 15 16 10 5 21"></polyline>
-                          </svg>
-                          <div style={{ fontSize: '12px' }}>Không có ảnh</div>
-                        </div>
-                      )}
+                </div>
+              </Col>
+
+              {/* CỘT PHẢI: HỌC VIÊN & NGÂN HÀNG & BILL */}
+              <Col xs={24} md={12}>
+                <div style={{ marginBottom: '32px' }}>
+                  <Title level={5} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', marginBottom: '20px' }}>
+                    <UserOutlined style={{ color: '#f59e0b' }} /> Thông tin khách hàng
+                  </Title>
+                  
+                  <InfoRow icon={<UserOutlined />} label="Họ và tên" value={detail.studentInfo?.fullName || 'N/A'} />
+                  <InfoRow icon={<BarcodeOutlined />} label="Mã học viên" value={`#${detail.studentInfo?.studentId || 'N/A'}`} />
+                  <InfoRow icon={<Text style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>@</Text>} label="Email" value={detail.studentInfo?.email || 'N/A'} />
+                </div>
+
+                <div style={{ marginBottom: '32px' }}>
+                  <Title level={5} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', marginBottom: '20px' }}>
+                    <BankOutlined style={{ color: '#10b981' }} /> Tài khoản thụ hưởng
+                  </Title>
+                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <Text strong style={{ fontSize: '15px', color: '#1e293b', display: 'block', marginBottom: '8px' }}>Vietcombank</Text>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <Text type="secondary">Số tài khoản:</Text>
+                      <Text strong copyable style={{ color: '#0ea5e9', fontSize: '15px', fontWeight: 500 }}>1903829128312</Text>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Text type="secondary">Chủ tài khoản:</Text>
+                      <Text strong>CONG TY GIAO DUC EDUFLOW</Text>
                     </div>
                   </div>
-                } 
-                isFullWidth
-              />
-            </DetailRow>
-          </DetailTable>
+                </div>
 
-          <DetailTable title="Thông tin học viên">
-            <DetailRow>
-              <DetailCell 
-                label="Họ và tên" 
-                value={detail.studentInfo?.fullName || 'N/A'} 
-                isFullWidth 
-              />
-            </DetailRow>
-            <DetailRow>
-              <DetailCell 
-                label="Mã học viên" 
-                value={detail.studentInfo?.studentId || 'N/A'} 
-                isFullWidth
-              />
-            </DetailRow>
-            <DetailRow isLast>
-              <DetailCell 
-                label="Email" 
-                value={detail.studentInfo?.email || 'N/A'} 
-                isFullWidth
-              />
-            </DetailRow>
-          </DetailTable>
-
-          <DetailTable title="Thông tin khóa học">
-            <DetailRow>
-              <DetailCell 
-                label="Tên khóa học" 
-                value={<Text strong>{detail.courseInfo?.title || 'N/A'}</Text>} 
-                isFullWidth 
-              />
-            </DetailRow>
-            <DetailRow isLast>
-              <DetailCell 
-                label="Mã khóa học" 
-                value={detail.courseInfo?.courseId || 'N/A'} 
-                isFullWidth 
-              />
-            </DetailRow>
-          </DetailTable>
+                <div>
+                  <Title level={5} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', marginBottom: '16px' }}>
+                    <FileImageOutlined style={{ color: '#ec4899' }} /> Ảnh hóa đơn (Bill)
+                  </Title>
+                  
+                  <div style={{
+                    width: '100%', 
+                    height: '200px', 
+                    backgroundColor: '#f8fafc', 
+                    border: '2px dashed #cbd5e1', 
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: detail.transactionInfo?.billImageUrl ? 'pointer' : 'default',
+                    transition: 'all 0.3s',
+                    overflow: 'hidden'
+                  }}
+                  onMouseOver={e => { if (detail.transactionInfo?.billImageUrl) { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.backgroundColor = '#eff6ff'; } }}
+                  onMouseOut={e => { if (detail.transactionInfo?.billImageUrl) { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = '#f8fafc'; } }}
+                  onClick={() => {
+                      if (detail.transactionInfo?.billImageUrl) {
+                          window.open(detail.transactionInfo.billImageUrl, '_blank');
+                      }
+                  }}
+                  >
+                    {detail.transactionInfo?.billImageUrl ? (
+                      <img 
+                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/300?text=No+Bill+Image'; }}
+                        src={detail.transactionInfo.billImageUrl} 
+                        alt="Bill" 
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                      />
+                    ) : (
+                      <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+                        <FileImageOutlined style={{ fontSize: '32px', marginBottom: '8px' }} />
+                        <div style={{ fontSize: '14px' }}>Không có ảnh đính kèm</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </div>
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <Text type="secondary">Không có dữ liệu</Text>
+        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+          <Empty description="Không tìm thấy dữ liệu giao dịch" />
         </div>
       )}
     </Modal>

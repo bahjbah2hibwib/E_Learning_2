@@ -61,7 +61,7 @@ const UserDashboardPage = () => {
 
   return (
     <UserLayout>
-      <div style={{ padding: '0 8px', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ padding: '0 32px', maxWidth: '1600px', margin: '0 auto' }}>
         {/* Header Section */}
         <div style={{ marginBottom: '32px' }}>
           <Title level={3} style={{ marginBottom: 4 }}>Chào mừng trở lại, {userName}</Title>
@@ -215,7 +215,8 @@ const UserDashboardPage = () => {
             <Col xs={24} md={8} key={course.courseId || index}>
               <Card
                 hoverable
-                style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #f0f0f0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}
+                onClick={() => navigate(`/user/learning/${course.courseId}`)}
+                style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #f0f0f0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', cursor: 'pointer' }}
                 bodyStyle={{ padding: '20px' }}
                 cover={
                   <div style={{ height: '160px', overflow: 'hidden' }}>

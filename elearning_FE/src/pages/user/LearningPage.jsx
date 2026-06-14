@@ -204,7 +204,29 @@ const LearningPage = () => {
           selectedKeys={[`lesson-${activeLesson?.lessonId}`]}
           items={menuItems}
           style={{ borderRight: 'none' }}
+          className="learning-menu"
         />
+        <style>
+          {`
+            .learning-menu .ant-menu-item {
+              height: auto !important;
+              line-height: normal !important;
+              padding-top: 12px !important;
+              padding-bottom: 12px !important;
+              white-space: normal !important;
+            }
+            .learning-menu .ant-menu-submenu-title {
+              height: auto !important;
+              line-height: normal !important;
+              padding-top: 12px !important;
+              padding-bottom: 12px !important;
+              white-space: normal !important;
+            }
+            .learning-menu .ant-menu-item-selected {
+              background-color: #eff6ff !important;
+            }
+          `}
+        </style>
       </Sider>
 
       <Layout>

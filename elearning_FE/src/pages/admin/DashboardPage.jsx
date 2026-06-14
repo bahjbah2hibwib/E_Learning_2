@@ -374,7 +374,7 @@ const DashboardPage = () => {
       <div style={{ padding: '0 8px', maxWidth: '1400px', margin: '0 auto' }}>
         
         {/* Header (Bộ lọc thời gian nâng cao) */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
           <Space size="middle" style={{ flexWrap: 'wrap' }}>
             <RangePicker size="large" style={{ borderRadius: '8px' }} placeholder={['Từ ngày', 'Đến ngày']} />
             <Button 
@@ -395,48 +395,26 @@ const DashboardPage = () => {
           </div>
         ) : (
           <>
-            {/* Top Cards */}
-            <Row gutter={[32, 32]} style={{ marginBottom: '32px' }}>
-              <Col xs={24} md={8}>
-                <StatCard 
-                  icon={<TeamOutlined />} iconBg="#eff6ff" iconColor="#3b82f6"
-                  title="Tổng người dùng" value={userTotal.toLocaleString()}
-                  tagText="Thời gian thực" tagBg="#eff6ff" tagColor="#3b82f6"
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <StatCard 
-                  icon={<BookOutlined />} iconBg="#f3e8ff" iconColor="#8b5cf6"
-                  title="Tổng khóa học" value={courseTotal.toLocaleString()}
-                  tagText="Thời gian thực" tagBg="#f3e8ff" tagColor="#8b5cf6"
-                />
-              </Col>
-              <Col xs={24} md={8}>
-                <StatCard 
-                  icon={<DollarCircleOutlined />} iconBg="#d1fae5" iconColor="#10b981"
-                  title="Tổng doanh thu" value={revenueTotal.toLocaleString() + 'đ'}
-                  tagText="Thời gian thực" tagBg="#d1fae5" tagColor="#10b981"
-                />
-              </Col>
-            </Row>
+
 
             {/* Advanced Charts Section */}
-            <Row gutter={[32, 32]} style={{ marginBottom: '32px' }}>
+            <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
               {/* Area Chart: Revenue */}
               <Col xs={24} lg={12}>
                 <Card 
                   bordered={false} 
-                  style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  style={{ borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  bodyStyle={{ padding: '16px' }}
                   title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                      <div style={{ padding: '8px', background: '#e0e7ff', borderRadius: '12px', color: '#4f46e5' }}>
-                        <TrophyOutlined style={{ fontSize: '20px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0' }}>
+                      <div style={{ padding: '6px', background: '#e0e7ff', borderRadius: '12px', color: '#4f46e5' }}>
+                        <TrophyOutlined style={{ fontSize: '18px' }} />
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b' }}>Tăng trưởng doanh thu</span>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Tăng trưởng doanh thu</span>
                     </div>
                   }
                 >
-                  <div style={{ height: '350px', marginTop: '16px' }}>
+                  <div style={{ height: '280px', marginTop: '16px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={revenueData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                         <defs>
@@ -452,7 +430,7 @@ const DashboardPage = () => {
                           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                           formatter={(value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)}
                         />
-                        <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                        <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" label={{ position: 'top', fill: '#1e293b', fontSize: 11, fontWeight: 600, formatter: (val) => val > 0 ? formatCurrency(val) : '' }} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -463,17 +441,18 @@ const DashboardPage = () => {
               <Col xs={24} lg={12}>
                 <Card 
                   bordered={false} 
-                  style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  style={{ borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  bodyStyle={{ padding: '16px' }}
                   title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                      <div style={{ padding: '8px', background: '#dcfce7', borderRadius: '12px', color: '#16a34a' }}>
-                        <UserOutlined style={{ fontSize: '20px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0' }}>
+                      <div style={{ padding: '6px', background: '#dcfce7', borderRadius: '12px', color: '#16a34a' }}>
+                        <UserOutlined style={{ fontSize: '18px' }} />
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b' }}>Tăng trưởng sinh viên</span>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Tăng trưởng sinh viên</span>
                     </div>
                   }
                 >
-                  <div style={{ height: '350px', marginTop: '16px' }}>
+                  <div style={{ height: '280px', marginTop: '16px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={studentGrowthData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }} barSize={32}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -483,7 +462,7 @@ const DashboardPage = () => {
                           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                           cursor={{ fill: '#f1f5f9' }}
                         />
-                        <Bar dataKey="students" name="Sinh viên mới" fill="#10b981" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey="students" name="Sinh viên mới" fill="#10b981" radius={[6, 6, 0, 0]} label={{ position: 'top', fill: '#1e293b', fontSize: 12, fontWeight: 600, formatter: (val) => val > 0 ? val : '' }} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -491,32 +470,34 @@ const DashboardPage = () => {
               </Col>
             </Row>
 
-            <Row gutter={[32, 32]} style={{ marginBottom: '32px' }}>
+            <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
               {/* Donut Chart: User Roles */}
               <Col xs={24} lg={12}>
                 <Card 
                   bordered={false} 
-                  style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  style={{ borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  bodyStyle={{ padding: '16px' }}
                   title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                      <div style={{ padding: '8px', background: '#eff6ff', borderRadius: '12px', color: '#3b82f6' }}>
-                        <PieChartOutlined style={{ fontSize: '20px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0' }}>
+                      <div style={{ padding: '6px', background: '#eff6ff', borderRadius: '12px', color: '#3b82f6' }}>
+                        <PieChartOutlined style={{ fontSize: '18px' }} />
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b' }}>Thành phần người dùng</span>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Thành phần người dùng</span>
                     </div>
                   }
                 >
-                  <div style={{ height: '350px', marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <ResponsiveContainer width="100%" height={250}>
+                  <div style={{ height: '280px', marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <ResponsiveContainer width="100%" height={230}>
                       <PieChart>
                         <Pie
                           data={userRoleData}
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
-                          outerRadius={90}
+                          outerRadius={85}
                           paddingAngle={5}
                           dataKey="value"
+                          label={{ fill: '#1e293b', fontSize: 12, fontWeight: 600, formatter: (val) => val > 0 ? val : '' }}
                         >
                           {userRoleData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -525,7 +506,7 @@ const DashboardPage = () => {
                         <RechartsTooltip contentStyle={{ borderRadius: '8px' }} />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div style={{ width: '100%', marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
                       {userRoleData.map((item, idx) => (
                         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }}></div>
@@ -541,27 +522,29 @@ const DashboardPage = () => {
               <Col xs={24} lg={12}>
                 <Card 
                   bordered={false} 
-                  style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  style={{ borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  bodyStyle={{ padding: '16px' }}
                   title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                      <div style={{ padding: '8px', background: '#fef3c7', borderRadius: '12px', color: '#d97706' }}>
-                        <PieChartOutlined style={{ fontSize: '20px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0' }}>
+                      <div style={{ padding: '6px', background: '#fef3c7', borderRadius: '12px', color: '#d97706' }}>
+                        <PieChartOutlined style={{ fontSize: '18px' }} />
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b' }}>Trạng thái khóa học</span>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Trạng thái khóa học</span>
                     </div>
                   }
                 >
-                  <div style={{ height: '350px', marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <ResponsiveContainer width="100%" height={250}>
+                  <div style={{ height: '280px', marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <ResponsiveContainer width="100%" height={230}>
                       <PieChart>
                         <Pie
                           data={courseStatusData}
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
-                          outerRadius={90}
+                          outerRadius={85}
                           paddingAngle={5}
                           dataKey="value"
+                          label={{ fill: '#1e293b', fontSize: 12, fontWeight: 600, formatter: (val) => val > 0 ? val : '' }}
                         >
                           {courseStatusData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -570,7 +553,7 @@ const DashboardPage = () => {
                         <RechartsTooltip contentStyle={{ borderRadius: '8px' }} />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div style={{ width: '100%', marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
                       {courseStatusData.map((item, idx) => (
                         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }}></div>
@@ -584,42 +567,7 @@ const DashboardPage = () => {
             </Row>
 
 
-            {/* Bảng Thống Kê Khóa Học */}
-            <Card 
-              bordered={false} 
-              style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', marginBottom: '32px' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
-                <Title level={4} style={{ margin: 0, color: '#1e293b', fontWeight: 700 }}>Thống Kê Tổng Quát Theo Ngày</Title>
-              </div>
-              
-              <div style={{ marginBottom: '40px', height: '350px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={dailyStatsData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                    <defs>
-                      <linearGradient id="colorCourses" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorEnrollments" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} allowDecimals={false} />
-                    <RechartsTooltip 
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                    <Area type="monotone" dataKey="courses" name="Khóa học mới tạo" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorCourses)" />
-                    <Area type="monotone" dataKey="enrollments" name="Học viên đã thanh toán" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorEnrollments)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
 
-            </Card>
 
           </>
         )}

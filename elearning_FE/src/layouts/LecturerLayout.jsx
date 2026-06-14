@@ -12,7 +12,6 @@ const LecturerLayout = ({ children }) => {
   const lecturerMenuItems = [
     { key: '/lecturer/dashboard', icon: <AppstoreOutlined />, label: 'Dashboard' },
     { key: '/lecturer/courses', icon: <BookOutlined />, label: 'Quản lý khóa học' },
-    { key: '/lecturer/students', icon: <TeamOutlined />, label: 'Quản lý học viên' },
   ];
 
   return (

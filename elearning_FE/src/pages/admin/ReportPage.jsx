@@ -239,7 +239,7 @@ const ReportPage = () => {
       <div style={{ padding: '0 8px', maxWidth: '1400px', margin: '0 auto' }}>
         
         {/* Header (Bộ lọc thời gian nâng cao) */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <Title level={3} style={{ margin: 0, color: '#1e293b', fontWeight: 800 }}>Dashboard Doanh Nghiệp</Title>
             <Text style={{ color: '#64748b' }}>Hệ thống quản trị tài chính & hoạt động</Text>
@@ -290,22 +290,23 @@ const ReportPage = () => {
             </Row>
 
             {/* Advanced Charts Section */}
-            <Row gutter={[32, 32]} style={{ marginBottom: '32px' }}>
+            <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
               {/* Area Chart: Revenue */}
               <Col xs={24} lg={16}>
                 <Card 
                   bordered={false} 
-                  style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  style={{ borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  bodyStyle={{ padding: '16px' }}
                   title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                      <div style={{ padding: '8px', background: '#e0e7ff', borderRadius: '12px', color: '#4f46e5' }}>
-                        <TrophyOutlined style={{ fontSize: '20px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0' }}>
+                      <div style={{ padding: '6px', background: '#e0e7ff', borderRadius: '12px', color: '#4f46e5' }}>
+                        <TrophyOutlined style={{ fontSize: '18px' }} />
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b' }}>Tăng trưởng doanh thu</span>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Tăng trưởng doanh thu</span>
                     </div>
                   }
                 >
-                  <div style={{ height: '350px', marginTop: '16px' }}>
+                  <div style={{ height: '280px', marginTop: '16px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={revenueData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                         <defs>
@@ -321,7 +322,7 @@ const ReportPage = () => {
                           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                           formatter={(value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)}
                         />
-                        <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                        <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" label={{ position: 'top', fill: '#1e293b', fontSize: 11, fontWeight: 600, formatter: (val) => val > 0 ? formatCurrency(val) : '' }} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -332,27 +333,29 @@ const ReportPage = () => {
               <Col xs={24} lg={8}>
                 <Card 
                   bordered={false} 
-                  style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  style={{ borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', height: '100%' }}
+                  bodyStyle={{ padding: '16px' }}
                   title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                      <div style={{ padding: '8px', background: '#fef3c7', borderRadius: '12px', color: '#d97706' }}>
-                        <PieChartOutlined style={{ fontSize: '20px' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0' }}>
+                      <div style={{ padding: '6px', background: '#fef3c7', borderRadius: '12px', color: '#d97706' }}>
+                        <PieChartOutlined style={{ fontSize: '18px' }} />
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b' }}>Trạng thái khóa học</span>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>Trạng thái khóa học</span>
                     </div>
                   }
                 >
-                  <div style={{ height: '350px', marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <ResponsiveContainer width="100%" height={250}>
+                  <div style={{ height: '280px', marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <ResponsiveContainer width="100%" height={230}>
                       <PieChart>
                         <Pie
                           data={courseStatusData}
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
-                          outerRadius={90}
+                          outerRadius={85}
                           paddingAngle={5}
                           dataKey="value"
+                          label={{ fill: '#1e293b', fontSize: 12, fontWeight: 600, formatter: (val) => val > 0 ? val : '' }}
                         >
                           {courseStatusData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -361,7 +364,7 @@ const ReportPage = () => {
                         <RechartsTooltip contentStyle={{ borderRadius: '8px' }} />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div style={{ width: '100%', marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
                       {courseStatusData.map((item, idx) => (
                         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }}></div>
@@ -377,7 +380,8 @@ const ReportPage = () => {
             {/* Data Table Enterprise */}
             <Card 
               bordered={false} 
-              style={{ borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}
+              style={{ borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}
+              bodyStyle={{ padding: '16px' }}
             >
               {/* Toolbar */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>

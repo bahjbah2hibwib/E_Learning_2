@@ -19,6 +19,7 @@ import instructorService from '../../services/instructorService';
 import fileService from '../../services/fileService';
 import CurriculumTab from './components/CurriculumTab';
 import StudentStatsTab from './components/StudentStatsTab';
+import CourseFilesTab from './components/CourseFilesTab';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -476,7 +477,7 @@ const LecturerCoursePage = () => {
                         label: <span style={{ fontWeight: 500, fontSize: '15px' }}>Chương trình học</span>, 
                         children: <CurriculumTab courseData={courseDetail} courseId={selectedCourse?.courseId} onRefresh={() => fetchCourseDetail(selectedCourse.courseId)} /> 
                       },
-                      { key: '3', label: <span style={{ fontWeight: 500, fontSize: '15px' }}>Tài liệu</span>, children: <div style={{ padding: '24px' }}>Nội dung Tài liệu...</div> },
+                      { key: '3', label: <span style={{ fontWeight: 500, fontSize: '15px' }}>Tài liệu</span>, children: <CourseFilesTab courseData={courseDetail} /> },
                       { key: '4', label: <span style={{ fontWeight: 500, fontSize: '15px' }}>Thống kê học viên</span>, children: <StudentStatsTab courseId={selectedCourse?.courseId} /> },
                     ]}
                   />

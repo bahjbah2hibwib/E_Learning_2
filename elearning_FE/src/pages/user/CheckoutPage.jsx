@@ -85,159 +85,162 @@ const CheckoutPage = () => {
 
   return (
     <UserLayout>
-      <div style={{ backgroundColor: '#f8fafc', minHeight: 'calc(100vh - 64px)', padding: '40px 0' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
-          
-          <div style={{ marginBottom: '24px' }}>
-            <Link to={`/user/courses/${id}`} style={{ color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <ArrowLeftOutlined /> Trở lại khóa học
-            </Link>
-            <Title level={2} style={{ margin: '16px 0 8px 0', color: '#1e293b' }}>Thanh toán Khóa học</Title>
-            <Text type="secondary" style={{ fontSize: '16px' }}>Hoàn tất đăng ký để bắt đầu học ngay.</Text>
+      <div style={{ backgroundColor: '#fff', minHeight: 'calc(100vh - 64px)', paddingBottom: '60px' }}>
+        {/* Header Section */}
+        <div style={{ backgroundColor: '#1c1d1f', padding: '32px 0', color: '#fff', marginBottom: '32px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+            <Title level={2} style={{ color: '#fff', margin: 0, fontWeight: 700 }}>Thanh toán bảo mật</Title>
           </div>
+        </div>
 
-          <Row gutter={32}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          <Link to={`/user/courses/${id}`} style={{ color: '#5624d0', display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '24px', fontWeight: 600 }}>
+            <ArrowLeftOutlined /> Quay lại khóa học
+          </Link>
+          
+          <Row gutter={48}>
             {/* Left Column: Payment Info & Methods */}
-            <Col xs={24} md={14}>
-              <Card bordered={false} style={{ borderRadius: '12px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <Title level={4} style={{ marginBottom: '20px' }}>Thông tin thanh toán</Title>
-                <Divider style={{ margin: '16px 0' }} />
+            <Col xs={24} lg={14}>
+              <div style={{ paddingRight: '16px' }}>
+                <Title level={3} style={{ marginBottom: '24px', fontWeight: 700 }}>Thông tin thanh toán</Title>
                 
-                <div style={{ marginBottom: '20px' }}>
-                  <Text strong style={{ display: 'block', marginBottom: '8px' }}>Mã giảm giá (Nếu có)</Text>
-                  <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ marginBottom: '32px' }}>
+                  <Text strong style={{ display: 'block', marginBottom: '8px', fontSize: '15px' }}>Mã giảm giá (Tùy chọn)</Text>
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     <Input 
-                      placeholder="Nhập mã..." 
+                      placeholder="Nhập mã giảm giá..." 
                       size="large" 
                       value={discountCode}
                       onChange={e => setDiscountCode(e.target.value)}
-                      style={{ borderRadius: '6px' }}
+                      style={{ borderRadius: '0', height: '48px', flex: 1, borderColor: '#1c1d1f' }}
                     />
-                    <Button size="large" style={{ backgroundColor: '#e2e8f0', borderColor: '#e2e8f0', borderRadius: '6px', fontWeight: 500 }}>
+                    <Button size="large" style={{ backgroundColor: '#1c1d1f', color: '#fff', borderRadius: '0', fontWeight: 700, height: '48px', padding: '0 24px' }}>
                       Áp dụng
                     </Button>
                   </div>
                 </div>
 
-                <div>
-                  <Text strong style={{ display: 'block', marginBottom: '8px' }}>Ghi chú (Tùy chọn)</Text>
+                <div style={{ marginBottom: '32px' }}>
+                  <Text strong style={{ display: 'block', marginBottom: '8px', fontSize: '15px' }}>Ghi chú đơn hàng (Tùy chọn)</Text>
                   <TextArea 
-                    rows={4} 
-                    placeholder="Ghi chú thêm về đơn hàng..." 
-                    style={{ borderRadius: '6px' }}
+                    rows={3} 
+                    placeholder="Bạn có yêu cầu đặc biệt gì không?" 
+                    style={{ borderRadius: '0', borderColor: '#1c1d1f' }}
                     value={note}
                     onChange={e => setNote(e.target.value)}
                   />
                 </div>
-              </Card>
 
-              <Card bordered={false} style={{ borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <Title level={4} style={{ marginBottom: '20px' }}>Phương thức thanh toán</Title>
-                <Divider style={{ margin: '16px 0' }} />
+                <Title level={3} style={{ marginBottom: '24px', fontWeight: 700, marginTop: '48px' }}>Phương thức thanh toán</Title>
                 
-                <Radio.Group onChange={e => setPaymentMethod(e.target.value)} value={paymentMethod} style={{ width: '100%' }}>
-                  <div style={{ 
-                    border: paymentMethod === 'momo' ? '1px solid #3b82f6' : '1px solid #e2e8f0', 
-                    borderRadius: '8px', 
-                    padding: '16px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '16px',
-                    cursor: 'pointer',
-                    backgroundColor: paymentMethod === 'momo' ? '#eff6ff' : '#fff'
-                  }} onClick={() => setPaymentMethod('momo')}>
-                    <Radio value="momo" />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ 
-                        width: '40px', height: '40px', borderRadius: '8px', 
-                        backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '20px', color: '#64748b'
-                      }}>
-                        <WalletOutlined />
-                      </div>
-                      <div>
-                        <Text strong style={{ display: 'block', fontSize: '15px' }}>Ví điện tử Momo</Text>
-                        <Text type="secondary" style={{ fontSize: '13px' }}>Quét mã QR thanh toán nhanh</Text>
-                      </div>
+                <div style={{ 
+                  border: '1px solid #1c1d1f', 
+                  borderRadius: '0',
+                  padding: '24px', 
+                  backgroundColor: '#f7f9fa',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  marginBottom: '24px'
+                }}>
+                  <Radio checked={paymentMethod === 'momo'} onChange={() => setPaymentMethod('momo')} style={{ transform: 'scale(1.2)' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="Momo" style={{ height: '32px', width: 'auto', borderRadius: '4px' }} />
+                      <Text strong style={{ fontSize: '16px', color: '#1c1d1f' }}>Ví MoMo</Text>
                     </div>
                   </div>
-                </Radio.Group>
-              </Card>
+                </div>
+
+                <div style={{ padding: '16px', backgroundColor: '#f7f9fa', border: '1px solid #d1d7dc', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <LockOutlined style={{ fontSize: '24px', color: '#1c1d1f' }} />
+                  <div>
+                    <Text strong style={{ display: 'block', fontSize: '14px' }}>Thanh toán an toàn 100%</Text>
+                    <Text type="secondary" style={{ fontSize: '12px' }}>Thông tin của bạn được mã hóa an toàn bằng công nghệ SSL 256-bit.</Text>
+                  </div>
+                </div>
+              </div>
             </Col>
 
             {/* Right Column: Order Summary */}
-            <Col xs={24} md={10}>
-              <Card bordered={false} style={{ borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <Title level={4} style={{ marginBottom: '20px' }}>Đơn hàng của bạn</Title>
-                <Divider style={{ margin: '16px 0' }} />
+            <Col xs={24} lg={10}>
+              <div style={{ 
+                backgroundColor: '#f7f9fa', 
+                padding: '32px', 
+                border: '1px solid #d1d7dc',
+                position: 'sticky',
+                top: '24px'
+              }}>
+                <Title level={3} style={{ marginBottom: '24px', fontWeight: 700 }}>Tóm tắt đơn hàng</Title>
                 
                 <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
                   <img 
                     onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/300?text=No+Image'; }}
                     src={course.thumbnailUrl || 'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png'} 
                     alt="course" 
-                    style={{ width: '100px', height: '64px', objectFit: 'cover', borderRadius: '8px' }}
+                    style={{ width: '120px', height: '68px', objectFit: 'cover', border: '1px solid #d1d7dc' }}
                   />
-                  <div>
-                    <Text strong style={{ display: 'block', fontSize: '15px', lineHeight: '1.4', marginBottom: '4px' }}>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ display: 'block', fontSize: '15px', lineHeight: '1.4', marginBottom: '4px', color: '#1c1d1f' }}>
                       {course.title}
                     </Text>
                     <Text type="secondary" style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>
-                      Giảng viên: {course.instructorName || 'Chưa cập nhật'}
+                      {course.instructorName || 'Chưa cập nhật'}
                     </Text>
-                    <Text strong style={{ color: '#2563eb', fontSize: '16px' }}>{formattedPrice}</Text>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <Text strong style={{ fontSize: '16px', color: '#1c1d1f' }}>{formattedPrice}</Text>
                   </div>
                 </div>
 
-                <Divider style={{ margin: '16px 0' }} />
+                <Divider style={{ margin: '16px 0', borderColor: '#d1d7dc' }} />
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <Text type="secondary">Tạm tính</Text>
-                  <Text strong>{formattedPrice}</Text>
+                  <Text style={{ fontSize: '16px', color: '#1c1d1f' }}>Giá gốc:</Text>
+                  <Text style={{ fontSize: '16px', color: '#1c1d1f' }}>{formattedPrice}</Text>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <Text style={{ color: '#10b981' }}>Giảm giá</Text>
-                  <Text style={{ color: '#10b981' }}>-0 đ</Text>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                  <Text style={{ fontSize: '16px', color: '#1c1d1f' }}>Giảm giá:</Text>
+                  <Text style={{ fontSize: '16px', color: '#1c1d1f' }}>- 0 ₫</Text>
                 </div>
 
-                <Divider style={{ margin: '16px 0' }} />
+                <Divider style={{ margin: '16px 0', borderColor: '#d1d7dc' }} />
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <Title level={4} style={{ margin: 0 }}>Tổng cộng</Title>
-                  <Title level={3} style={{ margin: 0, color: '#2563eb' }}>{formattedPrice}</Title>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                  <Text strong style={{ fontSize: '18px', color: '#1c1d1f' }}>Tổng cộng:</Text>
+                  <Text strong style={{ fontSize: '24px', color: '#1c1d1f' }}>{formattedPrice}</Text>
                 </div>
 
                 <Button 
                   type="primary" 
                   block 
-                  size="large" 
                   loading={payLoading}
                   onClick={handlePayment}
                   style={{ 
-                    height: '50px', 
-                    borderRadius: '8px', 
+                    height: '56px', 
+                    borderRadius: '0', 
                     fontSize: '16px', 
-                    fontWeight: 'bold',
-                    background: '#1d4ed8',
-                    border: 'none',
+                    fontWeight: 700,
+                    background: '#a435f0',
+                    borderColor: '#a435f0',
+                    boxShadow: 'none',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px'
                   }}
                 >
-                  <LockOutlined /> Thanh toán ngay
+                  Hoàn tất thanh toán
                 </Button>
 
                 <div style={{ textAlign: 'center', marginTop: '16px' }}>
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
-                    Bằng việc thanh toán, bạn đồng ý với <Link to="#">Điều khoản dịch vụ</Link> của chúng tôi.
+                  <Text type="secondary" style={{ fontSize: '12px', lineHeight: '1.5' }}>
+                    Bằng việc hoàn tất giao dịch mua, bạn đồng ý với <Link to="#" style={{ color: '#5624d0', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> này.
                   </Text>
                 </div>
-              </Card>
+              </div>
             </Col>
           </Row>
-
         </div>
       </div>
     </UserLayout>

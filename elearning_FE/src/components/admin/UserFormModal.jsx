@@ -12,6 +12,7 @@ const UserFormModal = ({ visible, onClose, onSuccess, editingUser }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarFileId, setAvatarFileId] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState('');
 
   const isEditMode = !!editingUser;
@@ -29,10 +30,13 @@ const UserFormModal = ({ visible, onClose, onSuccess, editingUser }) => {
         password: '', // Mật khẩu luôn để trống khi edit
       });
       setPreviewImage(editingUser.avatarUrl || '');
+      setSelectedFile(null);
+      setAvatarFileId(null);
     } else if (visible && !isEditMode) {
       form.resetFields();
       setPreviewImage('');
       setAvatarFileId(null);
+      setSelectedFile(null);
     }
   }, [visible, editingUser, isEditMode, form]);
 
@@ -40,35 +44,22 @@ const UserFormModal = ({ visible, onClose, onSuccess, editingUser }) => {
   const handleCancel = () => {
     form.resetFields();
     setAvatarFileId(null);
+    setSelectedFile(null);
     setPreviewImage('');
     onClose();
   };
 
-  // Custom hàm upload ảnh thay vì dùng mặc định của Ant Design
-  const handleUploadAvatar = async (options) => {
-    const { file, onSuccess: onAntSuccess, onError } = options;
-    try {
-      setUploading(true);
-      const res = await fileService.uploadFile(file);
-      if (res && res.success) {
-        setAvatarFileId(res.data.fileId); // Lưu ID của file
-        
-        // Tạo một preview URL tĩnh bằng objectURL hoặc đợi API Minio Presigned
-        // Ở đây để nhanh, ta tạo blob preview cho đẹp
-        const objectUrl = URL.createObjectURL(file);
-        setPreviewImage(objectUrl);
-        
-        message.success('Tải ảnh đại diện thành công');
-        onAntSuccess('ok');
-      }
-    } catch (error) {
-      console.error("Lỗi upload:", error);
-      const errorMsg = error.message || error.response?.data?.message || 'Có lỗi xảy ra khi tải ảnh lên.';
-      message.error('Tải ảnh thất bại: ' + errorMsg);
-      onError(error);
-    } finally {
-      setUploading(false);
-    }
+  // Custom hàm upload ảnh: Chỉ lưu file vào state, không gọi API ngay
+  const handleUploadAvatar = (options) => {
+    const { file, onSuccess: onAntSuccess } = options;
+    setSelectedFile(file); // Lưu file object
+    setAvatarFileId(null); // Reset ID nếu trước đó có
+    
+    // Tạo preview URL tĩnh để hiển thị ngay
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewImage(objectUrl);
+    
+    onAntSuccess('ok');
   };
 
   // Nút Upload Image (Giao diện hiển thị)
@@ -83,6 +74,18 @@ const UserFormModal = ({ visible, onClose, onSuccess, editingUser }) => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
+      let finalAvatarFileId = avatarFileId;
+
+      // Nếu có file mới được chọn, gọi API upload TRƯỚC KHI tạo user
+      if (selectedFile) {
+        const fileRes = await fileService.uploadFile(selectedFile);
+        if (fileRes && fileRes.success) {
+          finalAvatarFileId = fileRes.data.fileId;
+        } else {
+          throw new Error('Không thể tải ảnh lên, vui lòng thử lại.');
+        }
+      }
+
       // Ép kiểu DatePicker về định dạng YYYY-MM-DD
       let dateOfBirthStr = null;
       if (values.dateOfBirth) {
@@ -97,8 +100,8 @@ const UserFormModal = ({ visible, onClose, onSuccess, editingUser }) => {
         dateOfBirth: dateOfBirthStr,
         role: values.role,
         status: values.status !== undefined ? values.status : true,
-        // Chỉ gửi avatarFileId nếu có upload ảnh mới
-        ...(avatarFileId && { avatarFileId: avatarFileId })
+        // Chỉ gửi avatarFileId nếu có ID
+        ...(finalAvatarFileId && { avatarFileId: finalAvatarFileId })
       };
 
       let res;

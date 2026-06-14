@@ -41,7 +41,6 @@ const StatCard = ({ title, value, subtext, icon, iconBg, subtextColor = '#10b981
 const UserStatsCards = ({ stats }) => {
   // Bỏ dữ liệu fake theo yêu cầu. Nếu chưa có API, hiển thị "--"
   const data = stats || { total: '--', activeStudents: '--', totalInstructors: '--', newUsers: '--' };
-  const subtextFallback = stats ? null : 'Đang chờ API...';
 
   return (
     <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
