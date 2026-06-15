@@ -7,6 +7,7 @@ import com.example.elearning.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,6 +32,26 @@ public class CategoryController {
         response.put("success", true);
         response.put("message", "Lấy danh sách danh mục thành công");
         response.put("data", data);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> createCategory(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.example.elearning.dto.request.CategoryRequestDto request) {
+        if (categoryRepository.existsByCategoryName(request.getCategoryName())) {
+            throw new RuntimeException("Tên danh mục đã tồn tại");
+        }
+
+        Category category = new Category();
+        category.setCategoryName(request.getCategoryName());
+        category.setDescription(request.getDescription());
+
+        Category savedCategory = categoryRepository.save(category);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Tạo danh mục thành công");
+        response.put("data", categoryMapper.toDto(savedCategory));
 
         return ResponseEntity.ok(response);
     }

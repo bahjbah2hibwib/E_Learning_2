@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LecturerLayout from '../../layouts/LecturerLayout';
 import { 
   Typography, Card, Button, Input, Select, Space, message, Row, Col, 
-  Tabs, Form, Upload, Radio, Empty, Tag, Spin, Divider, Popconfirm
+  Tabs, Form, Upload, Radio, Empty, Tag, Spin, Divider, Popconfirm, Modal
 } from 'antd';
 import { 
   PlusOutlined, 
@@ -57,6 +57,35 @@ const LecturerCoursePage = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [form] = Form.useForm();
+
+  // State for Add Category
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      message.error('Vui lòng nhập tên danh mục');
+      return;
+    }
+    try {
+      setIsCreatingCategory(true);
+      const res = await instructorService.createCategory({ categoryName: newCategoryName });
+      if (res && res.success) {
+        message.success('Tạo danh mục mới thành công!');
+        setIsCategoryModalVisible(false);
+        setNewCategoryName('');
+        // Reload categories
+        fetchCategories();
+        // auto select the new category
+        form.setFieldsValue({ categoryId: res.data.categoryId });
+      }
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Không thể tạo danh mục');
+    } finally {
+      setIsCreatingCategory(false);
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -421,7 +450,21 @@ const LecturerCoursePage = () => {
                                     name="categoryId"
                                     rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
                                   >
-                                    <Select size="large" placeholder="Chọn danh mục">
+                                    <Select 
+                                      size="large" 
+                                      placeholder="Chọn danh mục"
+                                      dropdownRender={(menu) => (
+                                        <>
+                                          {menu}
+                                          <Divider style={{ margin: '8px 0' }} />
+                                          <Space style={{ padding: '0 8px 4px' }}>
+                                            <Button type="text" icon={<PlusOutlined />} onClick={() => setIsCategoryModalVisible(true)} style={{ color: '#3b82f6' }}>
+                                              Thêm danh mục mới
+                                            </Button>
+                                          </Space>
+                                        </>
+                                      )}
+                                    >
                                       {categories.map(c => (
                                         <Option key={c.categoryId} value={c.categoryId}>{c.categoryName}</Option>
                                       ))}
@@ -522,6 +565,31 @@ const LecturerCoursePage = () => {
           </Col>
         </Row>
       </div>
+
+      <Modal
+        title="Thêm danh mục mới"
+        open={isCategoryModalVisible}
+        onOk={handleCreateCategory}
+        onCancel={() => {
+          setIsCategoryModalVisible(false);
+          setNewCategoryName('');
+        }}
+        confirmLoading={isCreatingCategory}
+        okText="Thêm mới"
+        cancelText="Hủy"
+        width={400}
+      >
+        <div style={{ marginTop: '16px' }}>
+          <Text strong>Tên danh mục <span style={{ color: 'red' }}>*</span></Text>
+          <Input 
+            placeholder="Nhập tên danh mục..." 
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            style={{ marginTop: '8px', borderRadius: '6px' }}
+            size="large"
+          />
+        </div>
+      </Modal>
     </LecturerLayout>
   );
 };

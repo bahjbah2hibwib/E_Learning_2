@@ -107,6 +107,12 @@ const instructorService = {
   getCategories: () => {
     const url = '/categories';
     return axiosClient.get(url);
+  },
+
+  // Tạo danh mục mới
+  createCategory: (data) => {
+    const url = '/categories';
+    return axiosClient.post(url, data);
   }
 };
 
