@@ -1,12 +1,35 @@
-import React, { useRef, useState } from 'react';
-import { Table, Tag, Button, Avatar, Typography, Space, Tooltip, Input } from 'antd';
-import { SearchOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined, PictureOutlined } from '@ant-design/icons';
+import React, { useRef, useState } from "react";
+import {
+  Table,
+  Tag,
+  Button,
+  Avatar,
+  Typography,
+  Space,
+  Tooltip,
+  Input,
+} from "antd";
+import {
+  SearchOutlined,
+  EyeOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  PictureOutlined,
+} from "@ant-design/icons";
 
 const { Text } = Typography;
 
-const CourseTable = ({ data, loading, pagination, onPageChange, onApprove, onReject, onViewDetails }) => {
-  const [searchText, setSearchText] = useState('');
-  const [searchedColumn, setSearchedColumn] = useState('');
+const CourseTable = ({
+  data,
+  loading,
+  pagination,
+  onPageChange,
+  onApprove,
+  onReject,
+  onViewDetails,
+}) => {
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -17,19 +40,27 @@ const CourseTable = ({ data, loading, pagination, onPageChange, onApprove, onRej
 
   const handleReset = (clearFilters) => {
     clearFilters();
-    setSearchText('');
+    setSearchText("");
   };
 
   const getColumnSearchProps = (dataIndex, title) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
           placeholder={`Tìm kiếm ${title}...`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ marginBottom: 8, display: 'block' }}
+          style={{ marginBottom: 8, display: "block" }}
         />
         <Space>
           <Button
@@ -61,11 +92,14 @@ const CourseTable = ({ data, loading, pagination, onPageChange, onApprove, onRej
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
-        ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+        ? record[dataIndex]
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase())
         : false,
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
@@ -76,148 +110,263 @@ const CourseTable = ({ data, loading, pagination, onPageChange, onApprove, onRej
 
   const getStatusConfig = (status) => {
     switch (status) {
-      case 'APPROVED': return { color: '#dcfce7', textColor: '#15803d', text: 'Đã phê duyệt' };
-      case 'HIDDEN': return { color: '#f1f5f9', textColor: '#64748b', text: 'Đã ẩn/Từ chối' };
-      case 'PENDING': return { color: '#fef3c7', textColor: '#d97706', text: 'Chờ duyệt' };
-      default: return { color: '#f1f5f9', textColor: '#64748b', text: 'Không xác định' };
+      case "APPROVED":
+        return { color: "#dcfce7", textColor: "#15803d", text: "Đã phê duyệt" };
+      case "HIDDEN":
+        return {
+          color: "#f1f5f9",
+          textColor: "#64748b",
+          text: "Đã ẩn/Từ chối",
+        };
+      case "PENDING":
+        return { color: "#fef3c7", textColor: "#d97706", text: "Chờ duyệt" };
+      default:
+        return {
+          color: "#f1f5f9",
+          textColor: "#64748b",
+          text: "Không xác định",
+        };
     }
   };
 
   const columns = [
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>THAO TÁC</Text>,
-      key: 'action',
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          STT
+        </Text>
+      ),
+      key: "stt",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => (
+        <Text style={{ color: "#475569" }}>
+          {pagination.page * pagination.size + index + 1}
+        </Text>
+      ),
+    },
+    {
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          THAO TÁC
+        </Text>
+      ),
+      key: "action",
       width: 140,
       render: (_, record) => (
         <Space size="middle">
           <Tooltip title="Xem chi tiết">
-            <Button type="text" icon={<EyeOutlined style={{ color: '#64748b' }}/>} onClick={() => onViewDetails && onViewDetails(record)} />
+            <Button
+              type="text"
+              icon={<EyeOutlined style={{ color: "#64748b" }} />}
+              onClick={() => onViewDetails && onViewDetails(record)}
+            />
           </Tooltip>
-          
-          {(record.status === 'PENDING' || record.status === 'HIDDEN') && (
+
+          {(record.status === "PENDING" || record.status === "HIDDEN") && (
             <Tooltip title="Phê duyệt">
-              <Button type="text" icon={<CheckCircleOutlined style={{ color: '#10b981' }}/>} onClick={() => onApprove && onApprove(record)} />
+              <Button
+                type="text"
+                icon={<CheckCircleOutlined style={{ color: "#10b981" }} />}
+                onClick={() => onApprove && onApprove(record)}
+              />
             </Tooltip>
           )}
 
-          {(record.status === 'PENDING' || record.status === 'APPROVED') && (
+          {(record.status === "PENDING" || record.status === "APPROVED") && (
             <Tooltip title="Từ chối / Khóa">
-              <Button type="text" icon={<CloseCircleOutlined style={{ color: '#ef4444' }}/>} onClick={() => onReject && onReject(record)} />
+              <Button
+                type="text"
+                icon={<CloseCircleOutlined style={{ color: "#ef4444" }} />}
+                onClick={() => onReject && onReject(record)}
+              />
             </Tooltip>
           )}
         </Space>
       ),
     },
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>MÃ</Text>,
-      dataIndex: 'courseId',
-      key: 'courseId',
-      ...getColumnSearchProps('courseId', 'mã'),
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          MÃ
+        </Text>
+      ),
+      dataIndex: "courseId",
+      key: "courseId",
+      ...getColumnSearchProps("courseId", "mã"),
       render: (id) => (
-        <Text style={{ fontSize: '12px', color: '#94a3b8' }}>
-          CRS-{new Date().getFullYear()}-{id?.toString().padStart(3, '0')}
+        <Text style={{ fontSize: "12px", color: "#94a3b8" }}>
+          CRS-{new Date().getFullYear()}-{id?.toString().padStart(3, "0")}
         </Text>
       ),
     },
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>KHÓA HỌC</Text>,
-      dataIndex: 'title',
-      key: 'title',
-      sorter: (a, b) => (a.title || '').localeCompare(b.title || ''),
-      ...getColumnSearchProps('title', 'tên khóa học'),
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          KHÓA HỌC
+        </Text>
+      ),
+      dataIndex: "title",
+      key: "title",
+      sorter: (a, b) => (a.title || "").localeCompare(b.title || ""),
+      ...getColumnSearchProps("title", "tên khóa học"),
       render: (text, record) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Avatar 
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <Avatar
             shape="square"
-            src={record.thumbnailUrl} 
-            size={40} 
-            style={{ backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '6px' }}
+            src={record.thumbnailUrl}
+            size={40}
+            style={{
+              backgroundColor: "#e2e8f0",
+              color: "#475569",
+              borderRadius: "6px",
+            }}
             icon={!record.thumbnailUrl && <PictureOutlined />}
           />
-          <Text style={{ fontWeight: 600, color: '#1e293b' }}>
-            {text?.length > 40 ? text.substring(0, 40) + '...' : text}
+          <Text style={{ fontWeight: 600, color: "#1e293b" }}>
+            {text?.length > 40 ? text.substring(0, 40) + "..." : text}
           </Text>
         </div>
       ),
     },
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>GIẢNG VIÊN</Text>,
-      dataIndex: 'instructorName',
-      key: 'instructorName',
-      sorter: (a, b) => (a.instructorName || '').localeCompare(b.instructorName || ''),
-      ...getColumnSearchProps('instructorName', 'giảng viên'),
-      render: (text) => <Text style={{ color: '#475569' }}>{text || 'Chưa rõ'}</Text>
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          GIẢNG VIÊN
+        </Text>
+      ),
+      dataIndex: "instructorName",
+      key: "instructorName",
+      sorter: (a, b) =>
+        (a.instructorName || "").localeCompare(b.instructorName || ""),
+      ...getColumnSearchProps("instructorName", "giảng viên"),
+      render: (text) => (
+        <Text style={{ color: "#475569" }}>{text || "Chưa rõ"}</Text>
+      ),
     },
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>HỌC VIÊN</Text>,
-      dataIndex: 'totalStudents',
-      key: 'totalStudents',
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          HỌC VIÊN
+        </Text>
+      ),
+      dataIndex: "totalStudents",
+      key: "totalStudents",
       sorter: (a, b) => (a.totalStudents || 0) - (b.totalStudents || 0),
       render: (total) => (
-        <Tag color="#eff6ff" style={{ color: '#2563eb', fontWeight: 600, border: 'none', borderRadius: '12px', padding: '2px 10px' }}>
+        <Tag
+          color="#eff6ff"
+          style={{
+            color: "#2563eb",
+            fontWeight: 600,
+            border: "none",
+            borderRadius: "12px",
+            padding: "2px 10px",
+          }}
+        >
           {total || 0} học viên
         </Tag>
-      )
+      ),
     },
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>GIÁ</Text>,
-      dataIndex: 'price',
-      key: 'price',
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          GIÁ
+        </Text>
+      ),
+      dataIndex: "price",
+      key: "price",
       sorter: (a, b) => (a.price || 0) - (b.price || 0),
       render: (price) => (
-        <Text style={{ color: '#475569', fontWeight: 500 }}>
-          {price ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price) : 'Miễn phí'}
+        <Text style={{ color: "#475569", fontWeight: 500 }}>
+          {price
+            ? new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(price)
+            : "Miễn phí"}
         </Text>
-      )
+      ),
     },
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>TRẠNG THÁI</Text>,
-      dataIndex: 'status',
-      key: 'status',
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          TRẠNG THÁI
+        </Text>
+      ),
+      dataIndex: "status",
+      key: "status",
       filters: [
-        { text: 'Chờ duyệt', value: 'PENDING' },
-        { text: 'Đã phê duyệt', value: 'APPROVED' },
-        { text: 'Đã ẩn', value: 'HIDDEN' },
+        { text: "Chờ duyệt", value: "PENDING" },
+        { text: "Đã phê duyệt", value: "APPROVED" },
+        { text: "Đã ẩn", value: "HIDDEN" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => {
         const config = getStatusConfig(status);
         return (
-          <Tag color={config.color} style={{ color: config.textColor, fontWeight: 600, border: 'none', borderRadius: '12px', padding: '2px 12px' }}>
+          <Tag
+            color={config.color}
+            style={{
+              color: config.textColor,
+              fontWeight: 600,
+              border: "none",
+              borderRadius: "12px",
+              padding: "2px 12px",
+            }}
+          >
             {config.text}
           </Tag>
         );
-      }
+      },
     },
     {
-      title: <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>NGÀY GỬI</Text>,
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: (
+        <Text style={{ fontSize: "12px", color: "#64748b", fontWeight: 600 }}>
+          NGÀY GỬI
+        </Text>
+      ),
+      dataIndex: "createdAt",
+      key: "createdAt",
       sorter: (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0),
       render: (dateStr) => {
-        if (!dateStr) return '';
+        if (!dateStr) return "";
         const date = new Date(dateStr);
-        return <Text style={{ color: '#475569' }}>{date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</Text>;
-      }
-    }
+        return (
+          <Text style={{ color: "#475569" }}>
+            {date.toLocaleDateString("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
+          </Text>
+        );
+      },
+    },
   ];
 
   return (
-    <div style={{ backgroundColor: '#ffffff', borderRadius: '8px' }}>
-      <Table 
-        columns={columns} 
-        dataSource={data} 
-        rowKey="courseId" 
+    <div style={{ backgroundColor: "#ffffff", borderRadius: "8px" }}>
+      <Table
+        columns={columns}
+        dataSource={data}
+        rowKey="courseId"
         loading={loading}
-        pagination={pagination ? {
-          current: pagination.page + 1,
-          pageSize: pagination.size,
-          total: pagination.total,
-          showSizeChanger: true,
-          pageSizeOptions: ['5', '10', '20', '50'],
-          showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} bản ghi`,
-          onChange: (page, pageSize) => onPageChange && onPageChange(page - 1, pageSize)
-        } : false}
+        pagination={
+          pagination
+            ? {
+                current: pagination.page + 1,
+                pageSize: pagination.size,
+                total: pagination.total,
+                showSizeChanger: true,
+                pageSizeOptions: ["5", "10", "20", "50"],
+                showTotal: (total, range) =>
+                  `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} bản ghi`,
+                onChange: (page, pageSize) =>
+                  onPageChange && onPageChange(page - 1, pageSize),
+              }
+            : false
+        }
       />
     </div>
   );

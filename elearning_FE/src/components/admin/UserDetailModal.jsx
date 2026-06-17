@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Spin, message, Row, Col } from 'antd';
-import UserProfileCard from './UserProfileCard';
-import UserActivityTabs from './UserActivityTabs';
-import userService from '../../services/userService';
+import React, { useState, useEffect } from "react";
+import { Modal, Spin, message, Row, Col } from "antd";
+import UserProfileCard from "./UserProfileCard";
+import UserActivityTabs from "./UserActivityTabs";
+import userService from "../../services/userService";
 
 const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState("courses");
   const [tabData, setTabData] = useState([]);
   const [tabLoading, setTabLoading] = useState(false);
 
@@ -17,7 +17,7 @@ const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
     } else {
       // Reset state khi đóng modal
       setUserData(null);
-      setActiveTab('courses');
+      setActiveTab("courses");
       setTabData([]);
     }
   }, [visible, userId]);
@@ -28,11 +28,11 @@ const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
       const response = await userService.getUserById(id);
       if (response.success) {
         setUserData(response.data);
-        fetchTabData('courses', response.data.role);
+        fetchTabData("courses", response.data.role);
       }
     } catch (error) {
       console.error("Lỗi lấy chi tiết:", error);
-      message.error(error.message || 'Không thể lấy thông tin người dùng');
+      message.error(error.message || "Không thể lấy thông tin người dùng");
       onClose();
     } finally {
       setLoading(false);
@@ -42,12 +42,12 @@ const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
   const fetchTabData = async (tabKey, role) => {
     setTabLoading(true);
     try {
-      if (tabKey === 'courses') {
+      if (tabKey === "courses") {
         const response = await userService.getUserCourses(userId);
         if (response.success) {
           setTabData(response.data);
         }
-      } else if (tabKey === 'payments') {
+      } else if (tabKey === "payments") {
         const response = await userService.getUserPayments(userId);
         if (response.success) {
           setTabData(response.data);
@@ -55,7 +55,7 @@ const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
       }
     } catch (error) {
       console.error("Lỗi lấy dữ liệu tab:", error);
-      message.error(error.message || 'Không thể lấy dữ liệu hoạt động');
+      message.error(error.message || "Không thể lấy dữ liệu hoạt động");
       setTabData([]);
     } finally {
       setTabLoading(false);
@@ -74,7 +74,7 @@ const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
   };
 
   const handleToggleLock = () => {
-    message.info('Tính năng Khóa/Mở khóa đang được phát triển!');
+    message.info("Tính năng Khóa/Mở khóa đang được phát triển!");
   };
 
   return (
@@ -83,23 +83,38 @@ const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={1000}
+      width={1600}
       destroyOnClose
-      bodyStyle={{ padding: '24px', backgroundColor: '#f8fafc', borderRadius: '8px' }}
+      bodyStyle={{
+        padding: "24px",
+        backgroundColor: "#f8fafc",
+        borderRadius: "8px",
+      }}
       centered
     >
       <Spin spinning={loading} size="large" tip="Đang tải dữ liệu...">
         {userData ? (
-          <Row gutter={[24, 24]} style={{ display: 'flex', alignItems: 'stretch' }}>
-            <Col xs={24} lg={8} style={{ display: 'flex', flexDirection: 'column' }}>
-              <UserProfileCard 
-                userData={userData} 
+          <Row
+            gutter={[24, 24]}
+            style={{ display: "flex", alignItems: "stretch" }}
+          >
+            <Col
+              xs={24}
+              lg={8}
+              style={{ display: "flex", flexDirection: "column" }}
+            >
+              <UserProfileCard
+                userData={userData}
                 onEdit={handleEdit}
                 onToggleLock={handleToggleLock}
               />
             </Col>
-            <Col xs={24} lg={16} style={{ display: 'flex', flexDirection: 'column' }}>
-              <UserActivityTabs 
+            <Col
+              xs={24}
+              lg={16}
+              style={{ display: "flex", flexDirection: "column" }}
+            >
+              <UserActivityTabs
                 userData={userData}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
@@ -109,7 +124,7 @@ const UserDetailModal = ({ visible, userId, onClose, onOpenEdit }) => {
             </Col>
           </Row>
         ) : (
-          <div style={{ minHeight: '400px' }}></div>
+          <div style={{ minHeight: "400px" }}></div>
         )}
       </Spin>
     </Modal>
