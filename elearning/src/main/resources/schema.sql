@@ -101,6 +101,7 @@ CREATE TABLE elearning.videos (
     lesson_id BIGINT NOT NULL,
     video_type VARCHAR(20) NOT NULL,
     video_file_id BIGINT,
+    youtube_url VARCHAR(500),
     duration INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_video_type CHECK (video_type IN ('UPLOAD', 'YOUTUBE')),

@@ -235,12 +235,23 @@ public class CourseServiceImpl implements CourseService {
                         // Videos
                         List<Video> videos = videoRepository.findByLesson_LessonId(lessonId);
                         lessonDto.setVideoCount(videos.size());
-                        lessonDto.setVideos(videos.stream().map(v -> CourseAdminDetailResponseDto.VideoDto.builder()
+                        lessonDto.setVideos(videos.stream().map(v -> {
+                            String title = "Video bài giảng";
+                            String url = null;
+                            if (v.getVideoType() == com.example.elearning.model.enums.VideoType.YOUTUBE) {
+                                title = "YouTube Video";
+                                url = v.getYoutubeUrl();
+                            } else if (v.getVideoFile() != null) {
+                                title = v.getVideoFile().getFileName();
+                                url = minioService.getPreSignedUrl(v.getVideoFile().getFilePath());
+                            }
+                            return CourseAdminDetailResponseDto.VideoDto.builder()
                                 .videoId(v.getVideoId())
-                                .title(v.getVideoFile() != null ? v.getVideoFile().getFileName() : "Video bài giảng")
-                                .videoUrl(v.getVideoFile() != null ? minioService.getPreSignedUrl(v.getVideoFile().getFilePath()) : null)
+                                .title(title)
+                                .videoUrl(url)
                                 .durationMinutes(v.getDuration() != null ? v.getDuration() : 0)
-                                .build()).collect(Collectors.toList()));
+                                .build();
+                        }).collect(Collectors.toList()));
                         
                         int totalDuration = videos.stream().mapToInt(v -> v.getDuration() != null ? v.getDuration() : 0).sum();
                         lessonDto.setDurationMinutes(totalDuration);
@@ -337,12 +348,23 @@ public class CourseServiceImpl implements CourseService {
                         // Videos
                         List<Video> videos = videoRepository.findByLesson_LessonId(lessonId);
                         lessonDto.setVideoCount(videos.size());
-                        lessonDto.setVideos(videos.stream().map(v -> CourseAdminDetailResponseDto.VideoDto.builder()
+                        lessonDto.setVideos(videos.stream().map(v -> {
+                            String title = "Video bài giảng";
+                            String url = null;
+                            if (v.getVideoType() == com.example.elearning.model.enums.VideoType.YOUTUBE) {
+                                title = "YouTube Video";
+                                url = v.getYoutubeUrl();
+                            } else if (v.getVideoFile() != null) {
+                                title = v.getVideoFile().getFileName();
+                                url = minioService.getPreSignedUrl(v.getVideoFile().getFilePath());
+                            }
+                            return CourseAdminDetailResponseDto.VideoDto.builder()
                                 .videoId(v.getVideoId())
-                                .title(v.getVideoFile() != null ? v.getVideoFile().getFileName() : "Video bài giảng")
-                                .videoUrl(v.getVideoFile() != null ? minioService.getPreSignedUrl(v.getVideoFile().getFilePath()) : null)
+                                .title(title)
+                                .videoUrl(url)
                                 .durationMinutes(v.getDuration() != null ? v.getDuration() : 0)
-                                .build()).collect(Collectors.toList()));
+                                .build();
+                        }).collect(Collectors.toList()));
                         
                         // Set total lesson duration
                         int totalDuration = videos.stream().mapToInt(v -> v.getDuration() != null ? v.getDuration() : 0).sum();

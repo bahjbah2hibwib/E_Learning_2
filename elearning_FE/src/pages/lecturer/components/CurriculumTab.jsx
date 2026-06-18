@@ -18,6 +18,7 @@ import {
   Tabs,
   List,
   Radio,
+  InputNumber,
 } from "antd";
 import {
   PlusOutlined,
@@ -33,6 +34,7 @@ import {
   ExclamationCircleOutlined,
   InboxOutlined,
   CloseCircleOutlined,
+  YoutubeOutlined,
 } from "@ant-design/icons";
 import instructorService from "../../../services/instructorService";
 
@@ -90,6 +92,8 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
 
   const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState("");
+  const [youtubeUrlInput, setYoutubeUrlInput] = useState("");
+  const [youtubeDurationInput, setYoutubeDurationInput] = useState(0);
 
   const [sectionForm] = Form.useForm();
   const [lessonForm] = Form.useForm();
@@ -270,7 +274,41 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
       }
     } catch (error) {
       onError(error);
-      message.error("Lỗi khi tải lên video");
+      message.error("Lỗi tải video lên: " + error.message);
+    }
+  };
+
+  const handleAddYoutubeVideo = async () => {
+    if (!youtubeUrlInput) {
+      message.error("Vui lòng nhập link YouTube");
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await instructorService.addLessonVideo(
+        selectedLessonForSettings.lessonId,
+        { 
+          youtubeUrl: youtubeUrlInput, 
+          videoType: "YOUTUBE", 
+          durationMinutes: youtubeDurationInput || 0 
+        }
+      );
+      if (res && res.success) {
+        message.success("Thêm video YouTube thành công!");
+        setYoutubeUrlInput("");
+        setYoutubeDurationInput(0);
+        setSelectedLessonForSettings((prev) => ({
+          ...prev,
+          videos: [...(prev.videos || []), res.data],
+        }));
+        if (onRefresh) onRefresh();
+      } else {
+        throw new Error(res.message || "Lỗi khi thêm video");
+      }
+    } catch (error) {
+      message.error(error.message || "Lỗi khi thêm video YouTube");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -769,38 +807,29 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
 
       {/* Modal Cài Đặt Bài Giảng */}
       <Modal
-        title={`Cài đặt bài giảng: ${selectedLessonForSettings?.title || ""}`}
+        title={
+          <div style={{ fontSize: "18px", fontWeight: "bold", paddingBottom: "12px", borderBottom: "1px solid #f1f5f9" }}>
+            Cài đặt bài giảng: <span style={{ color: "#3b82f6" }}>{selectedLessonForSettings?.title || ""}</span>
+          </div>
+        }
         open={isSettingsModalVisible}
         onCancel={() => setIsSettingsModalVisible(false)}
-        footer={[
-          <Button key="close" onClick={() => setIsSettingsModalVisible(false)}>
-            Đóng
-          </Button>,
-        ]}
-        width={700}
-        bodyStyle={{ padding: "24px 0" }}
+        footer={null}
+        width={1300}
+        style={{ top: 20 }}
+        bodyStyle={{ padding: "24px", backgroundColor: "#f8fafc", maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}
       >
-        <Tabs
-          defaultActiveKey="0"
-          tabPosition="left"
-          style={{ minHeight: "350px" }}
-        >
-          <Tabs.TabPane
-            tab={
-              <span>
-                <InfoCircleOutlined /> Thông tin
-              </span>
-            }
-            key="0"
-          >
-            <div style={{ padding: "0 24px" }}>
-              <Title level={5} style={{ marginTop: 0 }}>
-                Thông tin chung
-              </Title>
-              <Text
-                type="secondary"
-                style={{ display: "block", marginBottom: "16px" }}
-              >
+        <Row gutter={[24, 24]} align="stretch">
+          {/* Cột trái: Thông tin & Trắc nghiệm */}
+          <Col xs={24} lg={12} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* Thông tin chung */}
+            <Card
+              title={<><InfoCircleOutlined style={{ color: "#64748b", marginRight: "8px" }} /> Thông tin chung</>}
+              bordered={false}
+              style={{ borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", height: "100%" }}
+              headStyle={{ borderBottom: "1px solid #f1f5f9", fontWeight: 600, fontSize: "16px" }}
+            >
+              <Text type="secondary" style={{ display: "block", marginBottom: "20px" }}>
                 Cập nhật tiêu đề và nội dung chi tiết của bài giảng.
               </Text>
               <Form
@@ -810,343 +839,186 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
               >
                 <Form.Item
                   name="title"
-                  label="Tiêu đề bài giảng"
+                  label={<Text strong>Tiêu đề bài giảng</Text>}
                   rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
                 >
-                  <Input placeholder="Nhập tiêu đề..." />
+                  <Input size="large" placeholder="Nhập tiêu đề..." style={{ borderRadius: "8px" }} />
                 </Form.Item>
-                <Form.Item name="description" label="Nội dung chi tiết">
+                <Form.Item name="description" label={<Text strong>Nội dung chi tiết</Text>}>
                   <Input.TextArea
-                    rows={8}
+                    rows={6}
                     placeholder="Nhập nội dung chi tiết bài học..."
+                    style={{ borderRadius: "8px" }}
                   />
                 </Form.Item>
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" loading={loading}>
-                    Lưu thay đổi
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <Button type="primary" htmlType="submit" loading={loading} size="large" style={{ borderRadius: "8px", fontWeight: 500 }}>
+                    Lưu thông tin
                   </Button>
                 </Form.Item>
               </Form>
-            </div>
-          </Tabs.TabPane>
+            </Card>
 
-          <Tabs.TabPane
-            tab={
-              <span>
-                <PlayCircleFilled /> Video
-              </span>
-            }
-            key="1"
-          >
-            <div style={{ padding: "0 24px" }}>
-              <Title level={5} style={{ marginTop: 0 }}>
-                Tải lên Video Bài giảng
-              </Title>
-              <Text
-                type="secondary"
-                style={{ display: "block", marginBottom: "16px" }}
-              >
-                Hỗ trợ định dạng MP4, WebM. Kích thước tối đa 500MB.
-              </Text>
-              <Upload.Dragger
-                customRequest={handleUploadVideo}
-                showUploadList={false}
-                maxCount={1}
-                accept="video/*"
-              >
-                <p className="ant-upload-drag-icon">
-                  <InboxOutlined />
-                </p>
-                <p className="ant-upload-text">
-                  Kéo thả hoặc nhấn để tải video lên
-                </p>
-                <p className="ant-upload-hint">
-                  Video sẽ được lưu trữ an toàn và tối ưu hóa để phát lại mượt
-                  mà.
-                </p>
-              </Upload.Dragger>
-              <div style={{ marginTop: "24px" }}>
-                <Text strong>Video đã tải lên:</Text>
-                {selectedLessonForSettings?.videos?.length > 0 ? (
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={selectedLessonForSettings.videos}
-                    renderItem={(item) => (
-                      <List.Item
-                        actions={[
-                          <Button
-                            danger
-                            type="text"
-                            size="small"
-                            icon={<DeleteOutlined />}
-                            key="delete"
-                          />,
-                        ]}
-                      >
-                        <List.Item.Meta
-                          avatar={
-                            <div
-                              style={{
-                                width: "40px",
-                                height: "40px",
-                                backgroundColor: "#e2e8f0",
-                                borderRadius: "4px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <PlayCircleFilled style={{ color: "#64748b" }} />
-                            </div>
-                          }
-                          title={
-                            <a
-                              href={
-                                item.videoUrl?.startsWith("http")
-                                  ? item.videoUrl
-                                  : `http://localhost:9000/elearning/${item.videoUrl}`
-                              }
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {item.title}
-                            </a>
-                          }
-                          description="Đã xử lý xong"
-                        />
-                      </List.Item>
-                    )}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      padding: "16px",
-                      textAlign: "center",
-                      backgroundColor: "#f8fafc",
-                      borderRadius: "8px",
-                      marginTop: "8px",
-                      border: "1px dashed #e2e8f0",
-                    }}
-                  >
-                    <Text type="secondary">Chưa có video nào.</Text>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Tabs.TabPane>
-
-          <Tabs.TabPane
-            tab={
-              <span>
-                <FileTextFilled /> Tài liệu
-              </span>
-            }
-            key="2"
-          >
-            <div style={{ padding: "0 24px" }}>
-              <Title level={5} style={{ marginTop: 0 }}>
-                Tài liệu đính kèm
-              </Title>
-              <Text
-                type="secondary"
-                style={{ display: "block", marginBottom: "16px" }}
-              >
-                Học viên có thể tải xuống các tài liệu này (PDF, Word, Excel,
-                ZIP).
-              </Text>
-              <Upload.Dragger
-                customRequest={handleUploadDocument}
-                showUploadList={false}
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.zip"
-              >
-                <p className="ant-upload-drag-icon">
-                  <InboxOutlined />
-                </p>
-                <p className="ant-upload-text">
-                  Kéo thả hoặc nhấn để tải tài liệu lên
-                </p>
-              </Upload.Dragger>
-              <div style={{ marginTop: "24px" }}>
-                <Text strong>Tài liệu hiện tại:</Text>
-                {selectedLessonForSettings?.documents?.length > 0 ? (
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={selectedLessonForSettings.documents}
-                    renderItem={(item) => (
-                      <List.Item
-                        actions={[
-                          <Button
-                            danger
-                            type="text"
-                            size="small"
-                            icon={<DeleteOutlined />}
-                            key="delete"
-                          />,
-                        ]}
-                      >
-                        <List.Item.Meta
-                          avatar={
-                            <div
-                              style={{
-                                width: "32px",
-                                height: "32px",
-                                backgroundColor: "#e2e8f0",
-                                borderRadius: "4px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <FileTextFilled style={{ color: "#64748b" }} />
-                            </div>
-                          }
-                          title={
-                            <a
-                              href={
-                                item.fileUrl?.startsWith("http")
-                                  ? item.fileUrl
-                                  : `http://localhost:9000/elearning/${item.fileUrl}`
-                              }
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {item.title}
-                            </a>
-                          }
-                          description="Tài liệu đính kèm"
-                        />
-                      </List.Item>
-                    )}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      padding: "16px",
-                      textAlign: "center",
-                      backgroundColor: "#f8fafc",
-                      borderRadius: "8px",
-                      marginTop: "8px",
-                      border: "1px dashed #e2e8f0",
-                    }}
-                  >
-                    <Text type="secondary">Chưa có tài liệu nào.</Text>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Tabs.TabPane>
-
-          <Tabs.TabPane
-            tab={
-              <span>
-                <QuestionCircleFilled /> Trắc nghiệm
-              </span>
-            }
-            key="3"
-          >
-            <div style={{ padding: "0 24px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "16px",
-                }}
-              >
-                <div>
-                  <Title level={5} style={{ margin: 0 }}>
-                    Ngân hàng câu hỏi
-                  </Title>
-                  <Text type="secondary">
-                    Tạo các câu hỏi để kiểm tra kiến thức học viên
-                  </Text>
-                </div>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={openQuestionModal}
-                >
+            {/* Trắc nghiệm */}
+            <Card
+              title={<><QuestionCircleFilled style={{ color: "#0ea5e9", marginRight: "8px" }} /> Trắc nghiệm (Quiz)</>}
+              bordered={false}
+              style={{ borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", height: "100%" }}
+              headStyle={{ borderBottom: "1px solid #f1f5f9", fontWeight: 600, fontSize: "16px" }}
+              extra={
+                <Button type="primary" ghost icon={<PlusOutlined />} onClick={openQuestionModal} style={{ borderRadius: "8px", fontWeight: 500 }}>
                   Thêm câu hỏi
                 </Button>
-              </div>
+              }
+            >
+              <Text type="secondary" style={{ display: "block", marginBottom: "20px" }}>
+                Tạo các câu hỏi trắc nghiệm để kiểm tra mức độ hiểu bài của học viên.
+              </Text>
               {selectedLessonForSettings?.quizzes?.length > 0 ? (
                 <List
                   itemLayout="horizontal"
                   dataSource={selectedLessonForSettings.quizzes}
                   renderItem={(item) => (
                     <List.Item
+                      style={{ backgroundColor: "#f8fafc", padding: "12px 16px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #e2e8f0" }}
                       actions={[
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<EditOutlined style={{ color: "#3b82f6" }} />}
-                          key="edit"
-                        />,
-                        <Button
-                          danger
-                          type="text"
-                          size="small"
-                          icon={<DeleteOutlined />}
-                          key="delete"
-                        />,
+                        <Button type="text" size="small" icon={<EditOutlined style={{ color: "#3b82f6" }} />} key="edit" />,
+                        <Button danger type="text" size="small" icon={<DeleteOutlined />} key="delete" />,
                       ]}
                     >
                       <List.Item.Meta
                         avatar={
-                          <div
-                            style={{
-                              width: "32px",
-                              height: "32px",
-                              backgroundColor: "#e0f2fe",
-                              borderRadius: "50%",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#0ea5e9",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            Q
-                          </div>
+                          <div style={{ width: "40px", height: "40px", backgroundColor: "#e0f2fe", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#0ea5e9", fontWeight: "bold", fontSize: "16px" }}>Q</div>
                         }
-                        title={item.title}
-                        description={`${item.questions?.length || 0} câu hỏi`}
+                        title={<Text strong>{item.title}</Text>}
+                        description={<Text type="secondary" style={{ fontSize: "13px" }}>{item.questions?.length || 0} câu hỏi</Text>}
                       />
                     </List.Item>
                   )}
                 />
               ) : (
-                <div
-                  style={{
-                    padding: "32px 16px",
-                    textAlign: "center",
-                    backgroundColor: "#f8fafc",
-                    borderRadius: "8px",
-                    border: "1px dashed #e2e8f0",
-                  }}
-                >
-                  <QuestionCircleFilled
-                    style={{
-                      fontSize: "32px",
-                      color: "#cbd5e1",
-                      marginBottom: "12px",
-                    }}
-                  />
-                  <p style={{ margin: 0, color: "#64748b" }}>
-                    Chưa có câu hỏi trắc nghiệm nào.
-                  </p>
-                  <Button
-                    type="dashed"
-                    style={{ marginTop: "12px" }}
-                    onClick={openQuestionModal}
-                  >
-                    Tạo câu hỏi đầu tiên
-                  </Button>
+                <div style={{ padding: "32px 16px", textAlign: "center", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
+                  <QuestionCircleFilled style={{ fontSize: "32px", color: "#94a3b8", marginBottom: "12px" }} />
+                  <p style={{ margin: 0, color: "#64748b" }}>Chưa có bài tập trắc nghiệm nào.</p>
+                  <Button type="dashed" style={{ marginTop: "16px", borderRadius: "8px" }} onClick={openQuestionModal}>Tạo câu hỏi đầu tiên</Button>
                 </div>
               )}
-            </div>
-          </Tabs.TabPane>
-        </Tabs>
+            </Card>
+          </Col>
+
+          {/* Cột phải: Video & Tài liệu */}
+          <Col xs={24} lg={12} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* Video */}
+            <Card
+              title={<><PlayCircleFilled style={{ color: "#ef4444", marginRight: "8px" }} /> Video Bài giảng</>}
+              bordered={false}
+              style={{ borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", height: "100%" }}
+              headStyle={{ borderBottom: "1px solid #f1f5f9", fontWeight: 600, fontSize: "16px" }}
+            >
+              <Text type="secondary" style={{ display: "block", marginBottom: "16px" }}>
+                Thêm video bài giảng từ YouTube (Khuyên dùng để tối ưu băng thông).
+              </Text>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div>
+                  <Text strong style={{ display: "block", marginBottom: "8px" }}>Link YouTube</Text>
+                  <Input 
+                    placeholder="VD: https://www.youtube.com/watch?v=..." 
+                    value={youtubeUrlInput}
+                    onChange={(e) => setYoutubeUrlInput(e.target.value)}
+                    prefix={<YoutubeOutlined style={{ color: "#ef4444" }} />}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: "16px", alignItems: "flex-end" }}>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ display: "block", marginBottom: "8px" }}>Thời lượng (phút)</Text>
+                    <InputNumber 
+                      min={0} 
+                      value={youtubeDurationInput} 
+                      onChange={setYoutubeDurationInput} 
+                      style={{ width: "100%" }} 
+                    />
+                  </div>
+                  <Button type="primary" onClick={handleAddYoutubeVideo} loading={loading} icon={<PlusOutlined />}>
+                    Thêm Video
+                  </Button>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: "24px" }}>
+                <Text strong style={{ display: "block", marginBottom: "12px" }}>Video đã thêm:</Text>
+                {selectedLessonForSettings?.videos?.length > 0 ? (
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={selectedLessonForSettings.videos}
+                    renderItem={(item) => (
+                      <List.Item
+                        style={{ backgroundColor: "#fff", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                        actions={[<Button danger type="text" size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteVideo(item.videoId)} key="delete" />]}
+                      >
+                        <List.Item.Meta
+                          avatar={<div style={{ width: "40px", height: "40px", backgroundColor: "#fee2e2", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}><PlayCircleFilled style={{ color: "#ef4444", fontSize: "20px" }} /></div>}
+                          title={<a href={item.videoUrl} target="_blank" rel="noreferrer" style={{ fontSize: "14px", fontWeight: 500 }}>{item.title}</a>}
+                          description={<span style={{ fontSize: "12px", color: "#10b981", fontWeight: 500 }}>✓ Đã liên kết ({item.durationMinutes} phút)</span>}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                ) : (
+                  <div style={{ padding: "16px", textAlign: "center", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px dashed #e2e8f0" }}>
+                    <Text type="secondary" style={{ fontSize: "13px" }}>Chưa có video nào.</Text>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Tài liệu */}
+            <Card
+              title={<><FileTextFilled style={{ color: "#10b981", marginRight: "8px" }} /> Tài liệu đính kèm</>}
+              bordered={false}
+              style={{ borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", height: "100%" }}
+              headStyle={{ borderBottom: "1px solid #f1f5f9", fontWeight: 600, fontSize: "16px" }}
+            >
+              <Text type="secondary" style={{ display: "block", marginBottom: "16px" }}>
+                Các file bổ sung (PDF, DOCX, ZIP) cho bài giảng.
+              </Text>
+              <Upload.Dragger
+                customRequest={handleUploadDocument}
+                showUploadList={false}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.zip"
+                style={{ backgroundColor: "#f8fafc", borderColor: "#cbd5e1", borderRadius: "12px", padding: "16px 0" }}
+              >
+                <p className="ant-upload-drag-icon"><InboxOutlined style={{ color: "#10b981" }} /></p>
+                <p className="ant-upload-text" style={{ fontSize: "15px", fontWeight: 500 }}>Nhấn hoặc kéo thả tài liệu vào đây</p>
+              </Upload.Dragger>
+              
+              <div style={{ marginTop: "24px" }}>
+                <Text strong style={{ display: "block", marginBottom: "12px" }}>Tài liệu hiện tại:</Text>
+                {selectedLessonForSettings?.documents?.length > 0 ? (
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={selectedLessonForSettings.documents}
+                    renderItem={(item) => (
+                      <List.Item
+                        style={{ backgroundColor: "#fff", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "8px" }}
+                        actions={[<Button danger type="text" size="small" icon={<DeleteOutlined />} key="delete" />]}
+                      >
+                        <List.Item.Meta
+                          avatar={<div style={{ width: "40px", height: "40px", backgroundColor: "#d1fae5", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}><FileTextFilled style={{ color: "#10b981", fontSize: "18px" }} /></div>}
+                          title={<a href={item.fileUrl?.startsWith("http") ? item.fileUrl : `http://localhost:9000/elearning/${item.fileUrl}`} target="_blank" rel="noreferrer" style={{ fontSize: "13px", wordBreak: "break-all", fontWeight: 500 }}>{item.title}</a>}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                ) : (
+                  <div style={{ padding: "16px", textAlign: "center", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px dashed #e2e8f0" }}>
+                    <Text type="secondary" style={{ fontSize: "13px" }}>Chưa có tài liệu đính kèm.</Text>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+        </Row>
       </Modal>
 
       {/* Modal Thêm Câu Hỏi */}

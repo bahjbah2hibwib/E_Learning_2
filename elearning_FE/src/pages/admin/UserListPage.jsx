@@ -212,7 +212,7 @@ const UserListPage = () => {
 
   return (
     // Bọc toàn bộ trang bằng cái Khung Admin (Có Sidebar xám mờ)
-    <AdminLayout>
+    <AdminLayout title="Quản lý người dùng">
       {/* Khối 1: Header - Đã chuyển nút xuống bộ lọc */}
 
       {/* Khối 2: 4 Thẻ thống kê */}

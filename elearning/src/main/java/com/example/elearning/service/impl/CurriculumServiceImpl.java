@@ -72,6 +72,24 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     @Transactional
+    public CourseAdminDetailResponseDto.SectionDto updateSection(Long sectionId, SectionCreateRequestDto requestDto, Long userId) {
+        Section section = sectionRepository.findById(sectionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Section", "id: " + sectionId));
+
+        if (!section.getCourse().getInstructor().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Chỉ giảng viên tạo khóa học mới được sửa chương", "FORBIDDEN_ACCESS");
+        }
+
+        if (requestDto.getTitle() != null && !requestDto.getTitle().trim().isEmpty()) {
+            section.setTitle(requestDto.getTitle());
+        }
+
+        Section savedSection = sectionRepository.save(section);
+        return courseMapper.toSectionDto(savedSection);
+    }
+
+    @Override
+    @Transactional
     public CourseAdminDetailResponseDto.LessonDto createLesson(Long sectionId, LessonCreateRequestDto requestDto, Long userId) {
         Section section = sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Section", "id: " + sectionId));
@@ -150,22 +168,34 @@ public class CurriculumServiceImpl implements CurriculumService {
             throw new AccessDeniedException("Chỉ giảng viên tạo khóa học mới được sửa", "FORBIDDEN_ACCESS");
         }
 
-        FileEntity file = fileEntityRepository.findById(requestDto.getFileId())
-                .orElseThrow(() -> new ResourceNotFoundException("File", "id: " + requestDto.getFileId()));
-
         Video video = Video.builder()
                 .lesson(lesson)
-                .videoType(VideoType.UPLOAD)
-                .videoFile(file)
                 .duration(requestDto.getDurationMinutes())
                 .build();
+
+        if ("YOUTUBE".equalsIgnoreCase(requestDto.getVideoType())) {
+            video.setVideoType(VideoType.YOUTUBE);
+            video.setYoutubeUrl(requestDto.getYoutubeUrl());
+        } else {
+            FileEntity file = fileEntityRepository.findById(requestDto.getFileId())
+                    .orElseThrow(() -> new ResourceNotFoundException("File", "id: " + requestDto.getFileId()));
+            video.setVideoType(VideoType.UPLOAD);
+            video.setVideoFile(file);
+        }
 
         Video savedVideo = videoRepository.save(video);
         
         CourseAdminDetailResponseDto.VideoDto dto = new CourseAdminDetailResponseDto.VideoDto();
         dto.setVideoId(savedVideo.getVideoId());
-        dto.setTitle(file.getFileName());
-        dto.setVideoUrl(file.getFilePath());
+        
+        if (savedVideo.getVideoType() == VideoType.YOUTUBE) {
+            dto.setTitle("YouTube Video");
+            dto.setVideoUrl(savedVideo.getYoutubeUrl());
+        } else {
+            dto.setTitle(savedVideo.getVideoFile().getFileName());
+            dto.setVideoUrl(savedVideo.getVideoFile().getFilePath());
+        }
+        
         dto.setDurationMinutes(savedVideo.getDuration());
         return dto;
     }
@@ -293,5 +323,57 @@ public class CurriculumServiceImpl implements CurriculumService {
                 .questionText(question.getQuestionText())
                 .answers(answerDtos)
                 .build();
+    }
+    @Override
+    @Transactional
+    public CourseAdminDetailResponseDto.QuestionDto updateQuestion(Long questionId, com.example.elearning.dto.request.QuestionUpdateRequestDto requestDto, Long userId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Question", "id: " + questionId));
+
+        if (!question.getQuiz().getLesson().getSection().getCourse().getInstructor().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Chỉ giảng viên tạo khóa học mới được sửa", "FORBIDDEN_ACCESS");
+        }
+
+        question.setQuestionText(requestDto.getQuestionText());
+        question = questionRepository.save(question);
+
+        // Delete old answers
+        java.util.List<Answer> oldAnswers = answerRepository.findByQuestion_QuestionId(questionId);
+        answerRepository.deleteAll(oldAnswers);
+
+        // Create new answers
+        java.util.List<CourseAdminDetailResponseDto.AnswerDto> answerDtos = new java.util.ArrayList<>();
+        for (com.example.elearning.dto.request.QuestionUpdateRequestDto.AnswerUpdateRequestDto ansDto : requestDto.getAnswers()) {
+            Answer answer = new Answer();
+            answer.setQuestion(question);
+            answer.setAnswerText(ansDto.getAnswerText());
+            answer.setIsCorrect(ansDto.getIsCorrect());
+            answer = answerRepository.save(answer);
+
+            CourseAdminDetailResponseDto.AnswerDto ans = new CourseAdminDetailResponseDto.AnswerDto();
+            ans.setAnswerId(answer.getAnswerId());
+            ans.setAnswerText(answer.getAnswerText());
+            ans.setIsCorrect(answer.getIsCorrect());
+            answerDtos.add(ans);
+        }
+
+        return CourseAdminDetailResponseDto.QuestionDto.builder()
+                .questionId(question.getQuestionId())
+                .questionText(question.getQuestionText())
+                .answers(answerDtos)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void deleteQuestion(Long questionId, Long userId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Question", "id: " + questionId));
+
+        if (!question.getQuiz().getLesson().getSection().getCourse().getInstructor().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Chỉ giảng viên tạo khóa học mới được xóa", "FORBIDDEN_ACCESS");
+        }
+
+        questionRepository.delete(question);
     }
 }

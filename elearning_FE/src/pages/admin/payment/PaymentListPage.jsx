@@ -169,7 +169,7 @@ const PaymentListPage = () => {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Quản lý giao dịch">
       <PaymentStatsCards stats={stats} />
 
       <PaymentFilter 

@@ -33,6 +33,9 @@ public class Video {
     @JoinColumn(name = "video_file_id")
     private FileEntity videoFile;
 
+    @Column(name = "youtube_url", length = 500)
+    private String youtubeUrl;
+
     @Column(name = "duration")
     private Integer duration;
 

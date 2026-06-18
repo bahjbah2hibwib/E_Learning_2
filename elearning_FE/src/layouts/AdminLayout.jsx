@@ -2,7 +2,7 @@ import React from 'react';
 import Sidebar from '../components/common/sidebar/Sidebar';
 import TopBar from '../components/common/TopBar';
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = ({ children, title = '' }) => {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       
@@ -19,6 +19,7 @@ const AdminLayout = ({ children }) => {
       }}>
         <TopBar />
         <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+          {title && <h2 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: 'bold', color: '#1e293b' }}>{title}</h2>}
           {/* Nội dung thực sự của từng trang (Ví dụ: Danh sách User, Quản lý khóa học...) sẽ được nhét vào đây */}
           {children}
         </div>

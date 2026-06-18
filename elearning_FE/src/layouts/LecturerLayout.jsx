@@ -7,7 +7,7 @@ import {
   TeamOutlined
 } from '@ant-design/icons';
 
-const LecturerLayout = ({ children }) => {
+const LecturerLayout = ({ children, title = '' }) => {
   // Menu dành riêng cho giảng viên
   const lecturerMenuItems = [
     { key: '/lecturer/dashboard', icon: <AppstoreOutlined />, label: 'Dashboard' },
@@ -32,6 +32,7 @@ const LecturerLayout = ({ children }) => {
         <TopBar userRole="Giảng viên" userName="Tài khoản Giảng viên" />
         
         <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+          {title && <h2 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: 'bold', color: '#1e293b' }}>{title}</h2>}
           {/* Nội dung thực sự của từng trang (Ví dụ: Dashboard, Quản lý khóa học...) */}
           {children}
         </div>

@@ -100,7 +100,7 @@ const CourseListPage = () => {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Quản lý khóa học">
       <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         <CourseTable 
           data={courseList}

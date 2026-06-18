@@ -35,6 +35,23 @@ public class CurriculumController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("/sections/{sectionId}")
+    public ResponseEntity<java.util.Map<String, Object>> updateSection(
+            @PathVariable Long sectionId,
+            @Valid @RequestBody SectionCreateRequestDto requestDto,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Long currentUserId = extractUserId(authHeader);
+        if (currentUserId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        CourseAdminDetailResponseDto.SectionDto section = curriculumService.updateSection(sectionId, requestDto, currentUserId);
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("success", true);
+        response.put("message", "Cập nhật chương học thành công");
+        response.put("data", section);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/sections/{sectionId}/lessons")
     public ResponseEntity<java.util.Map<String, Object>> createLesson(
             @PathVariable Long sectionId,

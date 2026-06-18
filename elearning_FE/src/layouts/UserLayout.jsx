@@ -1,73 +1,84 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import SidebarItem from '../components/common/sidebar/SidebarItem';
-import SidebarLogo from '../components/common/sidebar/SidebarLogo';
-import {
-  AppstoreOutlined,
-  BookOutlined,
-  SettingOutlined,
-  QuestionCircleOutlined,
-  LogoutOutlined,
-  PlayCircleOutlined
-} from '@ant-design/icons';
+import TopBar from '../components/common/TopBar';
+import Footer from '../components/common/Footer';
+import { Typography, Input } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
-const UserSidebar = () => {
+const { Title } = Typography;
+
+const UserLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const menuItems = [
-    { key: '/user/dashboard', icon: <AppstoreOutlined />, label: 'Dashboard' },
-    { key: '/user/courses', icon: <BookOutlined />, label: 'Khám phá khóa học' }
+    { key: '/user/courses', label: 'Khám phá' },
+    { key: '/user/dashboard', label: 'Học tập của tôi' }
   ];
 
-  return (
-    <div style={{
-      width: '260px',
-      height: '100vh',
-      backgroundColor: '#ffffff',
-      borderRight: '1px solid #e2e8f0',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      zIndex: 1000
-    }}>
-      <SidebarLogo />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {menuItems.map(item => (
-          <SidebarItem
-            key={item.key}
-            icon={item.icon}
-            label={item.label}
-            isActive={location.pathname === item.key || (item.key !== '/' && location.pathname.startsWith(item.key))}
-            onClick={() => navigate(item.key)}
-          />
-        ))}
+  const leftContent = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+      {/* Logo */}
+      <div 
+        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight: '16px' }} 
+        onClick={() => navigate('/user/dashboard')}
+      >
+        <Title level={3} style={{ color: '#1c1d1f', margin: 0, fontWeight: 800, letterSpacing: '-0.5px' }}>
+          EduFlow.
+        </Title>
       </div>
+
+      {/* Navigation Menu */}
+      <div style={{ display: 'flex', gap: '20px' }}>
+        {menuItems.map(item => {
+          const isActive = location.pathname === item.key || (item.key !== '/' && location.pathname.startsWith(item.key));
+          return (
+            <div
+              key={item.key}
+              onClick={() => navigate(item.key)}
+              style={{
+                cursor: 'pointer',
+                fontWeight: isActive ? 600 : 400,
+                fontSize: '15px',
+                color: isActive ? '#5624d0' : '#1c1d1f',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.color = '#5624d0';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.color = '#1c1d1f';
+              }}
+            >
+              {item.label}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Search Bar */}
+      <Input
+        size="large"
+        placeholder="Tìm kiếm nội dung học..."
+        prefix={<SearchOutlined style={{ color: '#1c1d1f' }} />}
+        style={{
+          borderRadius: '9999px',
+          backgroundColor: '#f7f9fa',
+          border: '1px solid #1c1d1f',
+          width: '360px',
+          marginLeft: '16px'
+        }}
+      />
     </div>
   );
-};
 
-import TopBar from '../components/common/TopBar';
-
-const UserLayout = ({ children }) => {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      <UserSidebar />
-      <div style={{ 
-        marginLeft: '260px',
-        flex: 1, 
-        display: 'flex',
-        flexDirection: 'column',
-        maxWidth: 'calc(100vw - 260px)'
-      }}>
-        <TopBar />
-        <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
-          {children}
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#ffffff' }}>
+      <TopBar leftContent={leftContent} />
+      <div style={{ flex: 1, minHeight: 'calc(100vh - 64px - 300px)' }}>
+        {children}
       </div>
+      <Footer />
     </div>
   );
 };

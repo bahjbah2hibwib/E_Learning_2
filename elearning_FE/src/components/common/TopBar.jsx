@@ -6,7 +6,8 @@ import {
   UserOutlined,
   LogoutOutlined,
   SettingOutlined,
-  CheckOutlined
+  CheckOutlined,
+  GlobalOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import notificationService from '../../services/notificationService';
@@ -24,7 +25,7 @@ const formatDateTime = (dateString) => {
   return `${hours}:${minutes} - ${day}/${month}/${year}`;
 };
 
-const TopBar = ({ userRole = 'Admin', userName = 'Tài khoản' }) => {
+const TopBar = ({ userRole = 'Admin', userName = 'Tài khoản', leftContent }) => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -175,16 +176,23 @@ const TopBar = ({ userRole = 'Admin', userName = 'Tài khoản' }) => {
       borderBottom: '1px solid #e2e8f0',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'flex-end', // Aligns items to the right
+      justifyContent: 'space-between', // Aligns items to the right
       padding: '0 32px',
       position: 'sticky',
       top: 0,
       zIndex: 999
     }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {leftContent}
+      </div>
       <Space size={24} align="center">
-        {/* Help Icon */}
+        {/* Help or Language Icon */}
         <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b', transition: 'color 0.3s' }} className="hover-text-blue">
-          <QuestionCircleOutlined style={{ fontSize: '20px' }} />
+          {localUserRole === 'Học viên' || localUserRole === 'ROLE_STUDENT' ? (
+            <GlobalOutlined style={{ fontSize: '20px' }} />
+          ) : (
+            <QuestionCircleOutlined style={{ fontSize: '20px' }} />
+          )}
         </div>
 
         {/* Notification Bell */}

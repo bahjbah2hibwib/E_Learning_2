@@ -370,7 +370,7 @@ const DashboardPage = () => {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Tổng quan (Dashboard)">
       <div style={{ padding: '0 8px', maxWidth: '1400px', margin: '0 auto' }}>
         
         {/* Header (Bộ lọc thời gian nâng cao) */}

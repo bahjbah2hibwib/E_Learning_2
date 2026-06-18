@@ -49,6 +49,12 @@ const instructorService = {
     return axiosClient.post(url, data);
   },
 
+  // Sửa chương học
+  updateSection: (sectionId, data) => {
+    const url = `/instructor/sections/${sectionId}`;
+    return axiosClient.put(url, data);
+  },
+
   // Xóa chương học
   deleteSection: (sectionId) => {
     const url = `/instructor/sections/${sectionId}`;

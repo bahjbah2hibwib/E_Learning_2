@@ -17,6 +17,7 @@ import webSocketService from './services/webSocketService';
 
 import LecturerDashboardPage from './pages/lecturer/LecturerDashboardPage';
 import LecturerCoursePage from './pages/lecturer/LecturerCoursePage';
+import LecturerCourseDetailPage from './pages/lecturer/LecturerCourseDetailPage';
 
 function App() {
   React.useEffect(() => {
@@ -32,8 +33,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Điều hướng mặc định tạm thời sang trang Đăng ký */}
-        <Route path="/" element={<Navigate to="/register" replace />} />
+        {/* Điều hướng mặc định chưa đăng nhập sang trang Đăng nhập */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
         
         {/* Cấu hình Router tương đương với @RequestMapping("/register") bên Backend */}
         <Route path="/register" element={<RegisterPage />} />
@@ -51,6 +52,7 @@ function App() {
         {/* Các trang giảng viên */}
         <Route path="/lecturer/dashboard" element={<LecturerDashboardPage />} />
         <Route path="/lecturer/courses" element={<LecturerCoursePage />} />
+        <Route path="/lecturer/courses/:id" element={<LecturerCourseDetailPage />} />
 
         {/* Các trang người dùng */}
         <Route path="/user/dashboard" element={<UserDashboardPage />} />

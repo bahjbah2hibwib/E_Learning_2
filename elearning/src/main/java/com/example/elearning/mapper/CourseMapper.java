@@ -32,6 +32,8 @@ public interface CourseMapper {
     @Mapping(source = "course.category.categoryName", target = "category.categoryName")
     @Mapping(source = "sections", target = "sections")
     @Mapping(target = "thumbnailUrl", ignore = true) // Sẽ được map thủ công qua MinioService
+    @Mapping(target = "totalStudents", ignore = true)
+    @Mapping(target = "instructorName", ignore = true)
     CourseAdminDetailResponseDto toCourseAdminDetailResponseDto(Course course, List<com.example.elearning.model.Section> sections);
 
     CourseAdminDetailResponseDto.SectionDto toSectionDto(com.example.elearning.model.Section section);

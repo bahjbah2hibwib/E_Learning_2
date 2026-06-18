@@ -90,7 +90,7 @@ const CourseApprovalPage = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout title="Duyệt khóa học">
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
           <Spin size="large" tip="Đang tải dữ liệu khóa học..." />
         </div>
@@ -106,7 +106,7 @@ const CourseApprovalPage = () => {
   if (courseDetail.status === 'HIDDEN') statusBadge = { color: 'default', text: 'Đã ẩn', icon: <StopOutlined /> };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Duyệt khóa học">
       {/* Header Actions */}
       <div style={{ 
         display: 'flex', 

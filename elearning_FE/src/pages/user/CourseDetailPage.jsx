@@ -136,7 +136,7 @@ const CourseDetailPage = () => {
 
             {/* What you will learn */}
             {course.whatYouWillLearn && course.whatYouWillLearn.trim() !== '' && (
-              <Card title="Những gì bạn sẽ học được" style={{ marginBottom: '32px', borderRadius: '12px' }} bordered={false} className="shadow-sm">
+              <Card title="Kiến thức bạn sẽ được trang bị" style={{ marginBottom: '32px', borderRadius: '12px' }} bordered={false} className="shadow-sm">
                 <Row gutter={[16, 16]}>
                   {course.whatYouWillLearn.split('\n').filter(item => item.trim() !== '').map((item, index) => (
                     <Col xs={24} sm={12} key={index}>
