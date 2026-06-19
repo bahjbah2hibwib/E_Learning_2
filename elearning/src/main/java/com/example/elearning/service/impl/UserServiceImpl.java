@@ -46,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final com.example.elearning.repository.LessonRepository lessonRepository;
     private final com.example.elearning.repository.LessonProgressRepository lessonProgressRepository;
     private final com.example.elearning.repository.CourseRepository courseRepository;
+    private final com.example.elearning.service.NotificationService notificationService;
 
     @org.springframework.beans.factory.annotation.Autowired
     @org.springframework.context.annotation.Lazy
@@ -354,6 +355,12 @@ public class UserServiceImpl implements UserService {
                 .build();
         
         enrollmentRepository.save(enrollment);
+
+        // Gửi thông báo cho Giảng viên
+        if (course.getInstructor() != null) {
+            String message = "Học viên " + student.getFullName() + " vừa đăng ký khóa học: " + course.getTitle();
+            notificationService.sendNotification(course.getInstructor().getUserId(), "Học viên mới", message, "NEW_ENROLLMENT");
+        }
     }
 
     @Override

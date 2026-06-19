@@ -13,6 +13,7 @@ import UserCoursesPage from './pages/user/UserCoursesPage';
 import CourseDetailPage from './pages/user/CourseDetailPage';
 import CheckoutPage from './pages/user/CheckoutPage';
 import LearningPage from './pages/user/LearningPage';
+import PaymentReturnPage from './pages/user/PaymentReturnPage';
 import webSocketService from './services/webSocketService';
 
 import LecturerDashboardPage from './pages/lecturer/LecturerDashboardPage';
@@ -60,6 +61,7 @@ function App() {
         <Route path="/user/courses/:id" element={<CourseDetailPage />} />
         <Route path="/user/checkout/:id" element={<CheckoutPage />} />
         <Route path="/user/learning/:id" element={<LearningPage />} />
+        <Route path="/payment/momo/return" element={<PaymentReturnPage />} />
       </Routes>
     </Router>
   );

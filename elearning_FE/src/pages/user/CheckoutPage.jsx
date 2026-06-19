@@ -10,6 +10,7 @@ import {
 import UserLayout from '../../layouts/UserLayout';
 import courseService from '../../services/courseService';
 import userService from '../../services/userService';
+import paymentService from '../../services/paymentService';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
 const { Title, Text } = Typography;
@@ -57,14 +58,37 @@ const CheckoutPage = () => {
 
       setPayLoading(true);
       
-      // Temporary: Directly enroll like before (until Momo is integrated)
-      const res = await userService.enrollCourse(user.userId, id);
-      if (res && res.success) {
-        message.success("Thanh toán thành công! Chúc bạn học tốt.");
-        navigate('/user/dashboard');
+      if (paymentMethod === 'momo') {
+        const amount = course.price || 0;
+        if (amount <= 0) {
+          // Khóa học miễn phí, đăng ký thẳng
+          const res = await userService.enrollCourse(user.userId, id);
+          if (res && res.success) {
+            message.success("Đăng ký khóa học thành công! Chúc bạn học tốt.");
+            navigate('/user/dashboard');
+          }
+          return;
+        }
+
+        const res = await paymentService.createMoMoPayment(id, amount);
+        if (res && res.success && res.payUrl) {
+          // Chuyển hướng người dùng sang trang thanh toán MoMo
+          window.location.href = res.payUrl;
+        } else {
+          message.error("Không thể lấy đường dẫn thanh toán MoMo.");
+          setPayLoading(false);
+        }
+      } else {
+        // Fallback for other methods if any
+        const res = await userService.enrollCourse(user.userId, id);
+        if (res && res.success) {
+          message.success("Thanh toán thành công! Chúc bạn học tốt.");
+          navigate('/user/dashboard');
+        }
       }
     } catch (error) {
-      message.error(error.response?.data?.message || "Lỗi khi thanh toán khóa học");
+      console.error("Payment error:", error);
+      message.error(error.message || "Lỗi khi thanh toán khóa học");
     } finally {
       setPayLoading(false);
     }

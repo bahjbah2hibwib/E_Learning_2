@@ -29,6 +29,15 @@ spring:
     init:
       mode: always 
 
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000 # 1 hour in ms
+
 
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
@@ -40,3 +49,12 @@ minio:
   access-key: ${MINIO_ACCESS_KEY:admin}
   secret-key: ${MINIO_SECRET_KEY:12345678}
   bucket-name: elearning
+
+# Cấu hình thanh toán MoMo (Môi trường Test)
+momo:
+  endpoint: ${MOMO_ENDPOINT:https://test-payment.momo.vn/v2/gateway/api/create}
+  partner-code: ${MOMO_PARTNER_CODE:MOMOES1X20260619_TEST}
+  access-key: ${MOMO_ACCESS_KEY:gVXeSHtLy1iBCBWM}
+  secret-key: ${MOMO_SECRET_KEY:ClpOZgL0IsLFvHoVghhRZeDD4kaCIMNI}
+  return-url: ${MOMO_RETURN_URL:http://localhost:5173/payment/momo/return}
+  notify-url: ${MOMO_NOTIFY_URL:https://<domain-cua-cau>/api/v1/payments/momo/ipn}

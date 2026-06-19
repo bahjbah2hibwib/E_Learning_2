@@ -10,6 +10,7 @@
 
 # Custom ignored folder requested by user
 contect/
+.env
 
 # Backend (Spring Boot)
 elearning/target/

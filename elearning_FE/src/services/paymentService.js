@@ -27,6 +27,15 @@ const paymentService = {
     } catch (error) {
       throw error.response?.data || { message: 'Lỗi lấy chi tiết giao dịch' };
     }
+  },
+
+  createMoMoPayment: async (courseId, amount) => {
+    try {
+      const response = await axiosClient.post('/payments/momo/create', { courseId, amount });
+      return response;
+    } catch (error) {
+      throw error || { message: 'Lỗi tạo yêu cầu thanh toán MoMo' };
+    }
   }
 };
 

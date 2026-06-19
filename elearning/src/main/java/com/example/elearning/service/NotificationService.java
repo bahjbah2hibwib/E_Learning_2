@@ -8,4 +8,8 @@ public interface NotificationService {
     long getUnreadCount(Long userId);
     void markAsRead(Long notificationId, Long userId);
     void markAllAsRead(Long userId);
+    
+    // Thêm các hàm tạo thông báo
+    void sendNotification(Long targetUserId, String title, String message, String type);
+    void sendNotificationToRole(com.example.elearning.model.enums.UserRole role, String title, String message, String type);
 }

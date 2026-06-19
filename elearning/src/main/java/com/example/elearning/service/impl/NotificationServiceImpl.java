@@ -24,6 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
+    private final com.example.elearning.repository.UserRepository userRepository;
 
     @Override
     public PageResponseDto<NotificationResponseDto> getMyNotifications(Long userId, int page, int size) {
@@ -68,5 +69,40 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAllAsRead(Long userId) {
         notificationRepository.markAllAsReadByUserId(userId);
+    }
+
+    @Override
+    @Transactional
+    public void sendNotification(Long targetUserId, String title, String message, String type) {
+        com.example.elearning.model.User targetUser = new com.example.elearning.model.User();
+        targetUser.setUserId(targetUserId);
+
+        Notification notification = Notification.builder()
+                .user(targetUser)
+                .title(title)
+                .message(message)
+                .type(type)
+                .isRead(false)
+                .build();
+        notificationRepository.save(notification);
+        
+        // Gọi WebSocket để gửi thông báo realtime (nếu có)
+    }
+
+    @Override
+    @Transactional
+    public void sendNotificationToRole(com.example.elearning.model.enums.UserRole role, String title, String message, String type) {
+        List<com.example.elearning.model.User> users = userRepository.findByRole(role);
+        List<Notification> notifications = users.stream().map(user -> 
+            Notification.builder()
+                .user(user)
+                .title(title)
+                .message(message)
+                .type(type)
+                .isRead(false)
+                .build()
+        ).collect(Collectors.toList());
+        
+        notificationRepository.saveAll(notifications);
     }
 }

@@ -33,6 +33,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -132,6 +134,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Cacheable(value = "publicCourses", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '')")
     public PageResponseDto<CourseAdminItemDto> getPublicCourses(int page, int size, String keyword) {
         Pageable pageable = PageRequest.of(page, size);
         String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
@@ -179,6 +182,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseDetailResponseDto updateCourseStatus(Long courseId, CourseStatusUpdateRequestDto request, String currentRole) {
         // Step 1: Kiểm tra xác thực
         boolean isAdmin = "ROLE_ADMIN".equals(currentRole);
@@ -209,6 +213,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Cacheable(value = "publicCourseDetail", key = "#courseId")
     public CourseAdminDetailResponseDto getPublicCourseDetail(Long courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new CourseNotFoundException(
@@ -472,6 +477,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseDetailResponseDto createCourse(com.example.elearning.dto.request.CourseCreateRequestDto request, Long instructorId) {
         com.example.elearning.model.User instructor = userRepository.findById(instructorId)
                 .orElseThrow(() -> new com.example.elearning.exception.ResourceNotFoundException("Không tìm thấy Instructor", "INSTRUCTOR_NOT_FOUND"));
@@ -519,6 +525,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseDetailResponseDto updateCourse(Long courseId, com.example.elearning.dto.request.CourseUpdateRequestDto request, Long instructorId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new com.example.elearning.exception.ResourceNotFoundException("Không tìm thấy khóa học", "COURSE_NOT_FOUND"));
@@ -565,6 +572,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public void deleteCourse(Long courseId, Long instructorId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new com.example.elearning.exception.ResourceNotFoundException("Không tìm thấy khóa học", "COURSE_NOT_FOUND"));
