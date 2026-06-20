@@ -12,14 +12,14 @@ import {
   Spin,
   Empty,
   Pagination,
-  Space
+  Space,
 } from "antd";
 import {
   PlusOutlined,
   SearchOutlined,
   StarFilled,
   UserOutlined,
-  BookOutlined
+  BookOutlined,
 } from "@ant-design/icons";
 import instructorService from "../../services/instructorService";
 
@@ -75,15 +75,43 @@ const LecturerCoursePage = () => {
 
   const renderStatusTag = (status) => {
     if (status === "APPROVED") {
-      return <Tag color="#16a34a" style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}>Đã duyệt</Tag>;
+      return (
+        <Tag
+          color="#16a34a"
+          style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}
+        >
+          Đã duyệt
+        </Tag>
+      );
     }
     if (status === "PENDING") {
-      return <Tag color="#f59e0b" style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}>Chờ duyệt</Tag>;
+      return (
+        <Tag
+          color="#f59e0b"
+          style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}
+        >
+          Chờ duyệt
+        </Tag>
+      );
     }
     if (status === "HIDDEN") {
-      return <Tag color="#64748b" style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}>Đã ẩn</Tag>;
+      return (
+        <Tag
+          color="#64748b"
+          style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}
+        >
+          Đã ẩn
+        </Tag>
+      );
     }
-    return <Tag color="#3b82f6" style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}>Bản nháp</Tag>;
+    return (
+      <Tag
+        color="#3b82f6"
+        style={{ borderRadius: "12px", border: "none", fontWeight: 600 }}
+      >
+        Bản nháp
+      </Tag>
+    );
   };
 
   return (
@@ -138,14 +166,29 @@ const LecturerCoursePage = () => {
           background-color: #eff6ff;
         }
       `}</style>
-      
-      <div style={{ padding: "0 24px 40px 24px", maxWidth: "1400px", margin: "0 auto" }}>
-        
+
+      <div style={{ padding: "0 8px 40px 8px" }}>
         {/* Header Section */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", flexWrap: "wrap", gap: "16px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "32px",
+            flexWrap: "wrap",
+            gap: "16px",
+          }}
+        >
           <div>
-            <Title level={2} style={{ margin: 0, fontWeight: 800, color: "#0f172a" }}>Quản lý khóa học</Title>
-            <Text type="secondary" style={{ fontSize: "16px" }}>Quản lý và cập nhật nội dung cho các khóa học của bạn</Text>
+            <Title
+              level={2}
+              style={{ margin: 0, fontWeight: 800, color: "#0f172a" }}
+            >
+              Quản lý khóa học
+            </Title>
+            <Text type="secondary" style={{ fontSize: "16px" }}>
+              Quản lý và cập nhật nội dung cho các khóa học của bạn
+            </Text>
           </div>
           <Space>
             <Input
@@ -160,8 +203,12 @@ const LecturerCoursePage = () => {
               type="primary"
               icon={<PlusOutlined />}
               size="large"
-              style={{ borderRadius: "8px", fontWeight: 600, padding: "0 24px" }}
-              onClick={() => navigate('/lecturer/courses/new')}
+              style={{
+                borderRadius: "8px",
+                fontWeight: 600,
+                padding: "0 24px",
+              }}
+              onClick={() => navigate("/lecturer/courses/new")}
             >
               Tạo khóa học
             </Button>
@@ -170,7 +217,14 @@ const LecturerCoursePage = () => {
 
         {/* Content Section */}
         {loading ? (
-          <div style={{ height: "40vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div
+            style={{
+              height: "40vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Spin size="large" tip="Đang tải danh sách..." />
           </div>
         ) : (
@@ -178,17 +232,38 @@ const LecturerCoursePage = () => {
             <Row gutter={[24, 32]}>
               {/* Card Create New */}
               <Col xs={24} sm={12} md={8} lg={6}>
-                <div className="create-card" style={{ borderRadius: "12px" }} onClick={() => navigate('/lecturer/courses/new')}>
-                  <div style={{ 
-                    width: "64px", height: "64px", borderRadius: "50%", 
-                    backgroundColor: "#eff6ff", color: "#3b82f6", 
-                    display: "flex", justifyContent: "center", alignItems: "center",
-                    fontSize: "24px", marginBottom: "16px"
-                  }}>
+                <div
+                  className="create-card"
+                  style={{ borderRadius: "12px" }}
+                  onClick={() => navigate("/lecturer/courses/new")}
+                >
+                  <div
+                    style={{
+                      width: "64px",
+                      height: "64px",
+                      borderRadius: "50%",
+                      backgroundColor: "#eff6ff",
+                      color: "#3b82f6",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      fontSize: "24px",
+                      marginBottom: "16px",
+                    }}
+                  >
                     <PlusOutlined />
                   </div>
-                  <Title level={4} style={{ color: "#0f172a", margin: 0 }}>Tạo khóa học mới</Title>
-                  <Text type="secondary" style={{ marginTop: "8px", textAlign: "center", padding: "0 16px" }}>
+                  <Title level={4} style={{ color: "#0f172a", margin: 0 }}>
+                    Tạo khóa học mới
+                  </Title>
+                  <Text
+                    type="secondary"
+                    style={{
+                      marginTop: "8px",
+                      textAlign: "center",
+                      padding: "0 16px",
+                    }}
+                  >
                     Bắt đầu xây dựng chương trình giảng dạy của bạn ngay hôm nay
                   </Text>
                 </div>
@@ -200,43 +275,104 @@ const LecturerCoursePage = () => {
                   <Card
                     className="course-card"
                     bodyStyle={{ padding: "0" }}
-                    onClick={() => navigate(`/lecturer/courses/${course.courseId}`)}
+                    onClick={() =>
+                      navigate(`/lecturer/courses/${course.courseId}`)
+                    }
                   >
                     <div className="course-card-img-wrapper">
-                      <img 
-                        src={course.thumbnailUrl || "https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"} 
+                      <img
+                        src={
+                          course.thumbnailUrl ||
+                          "https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+                        }
                         alt={course.title}
                         className="course-card-img"
-                        onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/400x225?text=No+Image"; }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://via.placeholder.com/400x225?text=No+Image";
+                        }}
                       />
-                      <div style={{ position: "absolute", top: "12px", right: "12px" }}>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "12px",
+                          right: "12px",
+                        }}
+                      >
                         {renderStatusTag(course.status)}
                       </div>
                     </div>
-                    
+
                     <div style={{ padding: "20px" }}>
-                      <Text type="secondary" style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", display: "block", marginBottom: "8px", color: "#64748b" }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                          display: "block",
+                          marginBottom: "8px",
+                          color: "#64748b",
+                        }}
+                      >
                         {course.categoryName || "Chưa phân loại"}
                       </Text>
-                      
-                      <Paragraph 
-                        strong 
-                        ellipsis={{ rows: 2 }} 
-                        style={{ fontSize: "16px", color: "#0f172a", marginBottom: "12px", lineHeight: 1.4, minHeight: "44px" }}
+
+                      <Paragraph
+                        strong
+                        ellipsis={{ rows: 2 }}
+                        style={{
+                          fontSize: "16px",
+                          color: "#0f172a",
+                          marginBottom: "12px",
+                          lineHeight: 1.4,
+                          minHeight: "44px",
+                        }}
                       >
                         {course.title}
                       </Paragraph>
-                      
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px", borderTop: "1px solid #f1f5f9", paddingTop: "16px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginTop: "16px",
+                          borderTop: "1px solid #f1f5f9",
+                          paddingTop: "16px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
                           <StarFilled style={{ color: "#f59e0b" }} />
-                          <Text strong style={{ color: "#334155" }}>4.8</Text>
-                          <Text type="secondary" style={{ fontSize: "12px" }}>(120)</Text>
+                          <Text strong style={{ color: "#334155" }}>
+                            4.8
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: "12px" }}>
+                            (120)
+                          </Text>
                         </div>
-                        
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748b" }}>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            color: "#64748b",
+                          }}
+                        >
                           <UserOutlined />
-                          <Text style={{ fontSize: "13px", fontWeight: 500 }}>{course.totalStudents?.toLocaleString() || 0} học viên</Text>
+                          <Text style={{ fontSize: "13px", fontWeight: 500 }}>
+                            {course.totalStudents?.toLocaleString() || 0} học
+                            viên
+                          </Text>
                         </div>
                       </div>
                     </div>
@@ -253,14 +389,20 @@ const LecturerCoursePage = () => {
 
             {/* Pagination */}
             {pagination.total > 0 && (
-              <div style={{ display: "flex", justifyContent: "center", marginTop: "40px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "40px",
+                }}
+              >
                 <Pagination
                   current={pagination.current}
                   pageSize={pagination.pageSize}
                   total={pagination.total}
                   onChange={handlePageChange}
                   showSizeChanger={true}
-                  pageSizeOptions={['8', '16', '24']}
+                  pageSizeOptions={["8", "16", "24"]}
                 />
               </div>
             )}
