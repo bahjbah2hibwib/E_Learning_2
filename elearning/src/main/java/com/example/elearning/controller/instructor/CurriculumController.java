@@ -167,6 +167,68 @@ public class CurriculumController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("/questions/{questionId}")
+    public ResponseEntity<java.util.Map<String, Object>> updateQuestion(
+            @PathVariable Long questionId,
+            @Valid @RequestBody com.example.elearning.dto.request.QuestionUpdateRequestDto requestDto,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Long currentUserId = extractUserId(authHeader);
+        if (currentUserId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        CourseAdminDetailResponseDto.QuestionDto question = curriculumService.updateQuestion(questionId, requestDto, currentUserId);
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("success", true);
+        response.put("message", "Cập nhật câu hỏi thành công");
+        response.put("data", question);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/questions/{questionId}")
+    public ResponseEntity<java.util.Map<String, Object>> deleteQuestion(
+            @PathVariable Long questionId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Long currentUserId = extractUserId(authHeader);
+        if (currentUserId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        curriculumService.deleteQuestion(questionId, currentUserId);
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("success", true);
+        response.put("message", "Xóa câu hỏi thành công");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/videos/{videoId}")
+    public ResponseEntity<java.util.Map<String, Object>> deleteVideo(
+            @PathVariable Long videoId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Long currentUserId = extractUserId(authHeader);
+        if (currentUserId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        curriculumService.deleteVideo(videoId, currentUserId);
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("success", true);
+        response.put("message", "Xóa video thành công");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/documents/{assetId}")
+    public ResponseEntity<java.util.Map<String, Object>> deleteDocument(
+            @PathVariable Long assetId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Long currentUserId = extractUserId(authHeader);
+        if (currentUserId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        curriculumService.deleteDocument(assetId, currentUserId);
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("success", true);
+        response.put("message", "Xóa tài liệu thành công");
+        return ResponseEntity.ok(response);
+    }
+
     private final com.example.elearning.security.JwtTokenProvider jwtTokenProvider;
 
     private Long extractUserId(String authHeader) {

@@ -190,9 +190,10 @@ const UserTable = ({
       ),
       dataIndex: "userId",
       key: "userId",
+      width: 120,
       ...getColumnSearchProps("userId", "mã"),
       render: (id, record) => (
-        <Text style={{ fontSize: "12px", color: "#94a3b8" }}>
+        <Text style={{ fontSize: "13px", color: "#475569", fontWeight: 500 }}>
           {record.role === "ROLE_STUDENT" ? "STU" : "INS"}-
           {new Date().getFullYear()}-{id?.toString().padStart(3, "0")}
         </Text>
@@ -206,6 +207,7 @@ const UserTable = ({
       ),
       dataIndex: "fullName",
       key: "fullName",
+      width: 260,
       ...getColumnSearchProps("fullName", "tên"),
       render: (text, record) => {
         const isOnline = onlineUserIds.includes(record.userId);
@@ -389,7 +391,7 @@ const UserTable = ({
         dataSource={data}
         rowKey="userId"
         loading={loading}
-        scroll={{ y: 500 }}
+        scroll={{ x: 1200, y: 500 }}
         pagination={
           pagination
             ? {

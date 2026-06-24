@@ -18,6 +18,7 @@ import {
 import userService from '../../services/userService';
 import courseService from '../../services/courseService';
 import paymentService from '../../services/paymentService';
+import webSocketService from '../../services/webSocketService';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -237,12 +238,23 @@ const DashboardPage = () => {
 
     fetchDashboardStats();
     
-    // Polling ngầm mỗi 5 giây
-    const interval = setInterval(() => {
-      fetchDashboardStats(true);
-    }, 5000);
+    let unsubscribe = null;
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const userObj = JSON.parse(userStr);
+        if (userObj && userObj.userId) {
+          // Khi có notification (vd: có người mua khóa học, đăng ký mới), lập tức tải lại Dashboard
+          unsubscribe = webSocketService.subscribe(`/topic/notifications/${userObj.userId}`, () => {
+            fetchDashboardStats(true);
+          });
+        }
+      }
+    } catch (e) {}
     
-    return () => clearInterval(interval);
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // 2. Fetch dữ liệu bảng (khi phân trang, tìm kiếm, lọc thay đổi)
@@ -267,12 +279,22 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchPayments();
     
-    // Polling ngầm mỗi 5 giây cho bảng
-    const interval = setInterval(() => {
-      fetchPayments(true);
-    }, 5000);
+    let unsubscribe = null;
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const userObj = JSON.parse(userStr);
+        if (userObj && userObj.userId) {
+          unsubscribe = webSocketService.subscribe(`/topic/notifications/${userObj.userId}`, () => {
+            fetchPayments(true);
+          });
+        }
+      }
+    } catch (e) {}
     
-    return () => clearInterval(interval);
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentPage, paymentPageSize, paymentStatusFilter]);
 

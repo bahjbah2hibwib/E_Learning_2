@@ -157,7 +157,7 @@ const LecturerCourseDetailPage = () => {
         description: values.description || "",
         whatYouWillLearn: values.whatYouWillLearn || "",
         categoryId: values.categoryId,
-        status: values.status,
+        status: isCreating ? "DRAFT" : values.status,
         price: values.type === "free" ? 0 : values.price || 0,
         thumbnailFileId: thumbnailFileId,
       };
@@ -339,14 +339,16 @@ const LecturerCourseDetailPage = () => {
                     </Select>
                   </Form.Item>
 
-                  <Form.Item label={<Text strong>Trạng thái</Text>} name="status">
-                    <Select size="large">
-                      <Option value="DRAFT">Bản nháp (Draft)</Option>
-                      <Option value="PENDING">Chờ duyệt (Pending)</Option>
-                      <Option value="HIDDEN">Đã ẩn (Hidden)</Option>
-                      <Option value="APPROVED" disabled>Đã duyệt (Chỉ Admin)</Option>
-                    </Select>
-                  </Form.Item>
+                  {!isCreating && (
+                    <Form.Item label={<Text strong>Trạng thái</Text>} name="status">
+                      <Select size="large">
+                        <Option value="DRAFT">Bản nháp (Draft)</Option>
+                        <Option value="PENDING">Chờ duyệt (Pending) - Gửi lên Admin</Option>
+                        <Option value="HIDDEN">Đã ẩn (Hidden)</Option>
+                        <Option value="APPROVED" disabled>Đã duyệt (Chỉ Admin)</Option>
+                      </Select>
+                    </Form.Item>
+                  )}
 
                   <Form.Item label={<Text strong>Loại khóa học</Text>} name="type">
                     <Select size="large">
@@ -391,7 +393,7 @@ const LecturerCourseDetailPage = () => {
                     loading={isSubmitting}
                     style={{ borderRadius: "8px", fontWeight: 600, height: "48px" }}
                   >
-                    {isCreating ? "Hoàn tất tạo khóa học" : "Lưu tất cả thay đổi"}
+                    {isCreating ? "Lưu thông tin & Bắt đầu thêm bài giảng" : "Lưu tất cả thay đổi"}
                   </Button>
                 </Card>
               </Col>
@@ -417,6 +419,19 @@ const LecturerCourseDetailPage = () => {
       key: "4",
       label: <span style={{ fontWeight: 500, fontSize: "15px" }}>Học viên</span>,
       children: <StudentStatsTab courseId={id} courseData={courseDetail} />,
+    });
+  } else {
+    items.push({
+      key: "2",
+      disabled: true,
+      label: <span style={{ fontWeight: 500, fontSize: "15px", color: "#cbd5e1" }}>Chương trình học (Khóa)</span>,
+      children: null,
+    });
+    items.push({
+      key: "3",
+      disabled: true,
+      label: <span style={{ fontWeight: 500, fontSize: "15px", color: "#cbd5e1" }}>Tài liệu (Khóa)</span>,
+      children: null,
     });
   }
 

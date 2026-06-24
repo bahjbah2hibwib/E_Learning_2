@@ -35,6 +35,7 @@ import {
   InboxOutlined,
   CloseCircleOutlined,
   YoutubeOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import instructorService from "../../../services/instructorService";
 
@@ -81,6 +82,7 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
   const [selectedLessonForSettings, setSelectedLessonForSettings] =
     useState(null);
   const [isQuestionModalVisible, setIsQuestionModalVisible] = useState(false);
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [questionForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -93,7 +95,6 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
   const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
   const [previewVideoUrl, setPreviewVideoUrl] = useState("");
   const [youtubeUrlInput, setYoutubeUrlInput] = useState("");
-  const [youtubeDurationInput, setYoutubeDurationInput] = useState(0);
 
   const [sectionForm] = Form.useForm();
   const [lessonForm] = Form.useForm();
@@ -278,6 +279,85 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
     }
   };
 
+  const extractYoutubeVideoId = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const fetchYoutubeDurationWithIframe = (videoId) => {
+    return new Promise((resolve) => {
+      const divId = 'yt-player-' + Date.now();
+      const div = document.createElement('div');
+      div.id = divId;
+      div.style.position = 'absolute';
+      div.style.left = '-9999px';
+      div.style.width = '10px';
+      div.style.height = '10px';
+      document.body.appendChild(div);
+
+      const checkYTAndInit = () => {
+        if (window.YT && window.YT.Player) {
+          const player = new window.YT.Player(divId, {
+            videoId: videoId,
+            events: {
+              'onReady': (event) => {
+                event.target.mute();
+                event.target.playVideo();
+                
+                const checkDur = setInterval(() => {
+                  const dur = event.target.getDuration();
+                  if (dur > 0) {
+                    clearInterval(checkDur);
+                    player.destroy();
+                    if (document.getElementById(divId)) {
+                      document.body.removeChild(div);
+                    }
+                    resolve(Math.ceil(dur / 60));
+                  }
+                }, 200);
+              },
+              'onStateChange': (event) => {
+                 // Đảm bảo video không tự chạy ngầm mãi
+                 if (event.data === 1 && window.YT) {
+                    const dur = event.target.getDuration();
+                    if (dur > 0) {
+                      player.pauseVideo();
+                    }
+                 }
+              },
+              'onError': () => {
+                player.destroy();
+                if (document.getElementById(divId)) {
+                  document.body.removeChild(div);
+                }
+                resolve(0);
+              }
+            }
+          });
+        } else {
+          setTimeout(checkYTAndInit, 100);
+        }
+      };
+
+      if (!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
+      checkYTAndInit();
+      
+      // Fallback nếu mạng chậm hoặc lỗi không phản hồi sau 5s
+      setTimeout(() => {
+        if (document.getElementById(divId)) {
+          document.body.removeChild(div);
+          resolve(0);
+        }
+      }, 5000);
+    });
+  };
+
   const handleAddYoutubeVideo = async () => {
     if (!youtubeUrlInput) {
       message.error("Vui lòng nhập link YouTube");
@@ -285,18 +365,28 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
     }
     try {
       setLoading(true);
+      
+      const videoId = extractYoutubeVideoId(youtubeUrlInput);
+      let calculatedDuration = 0;
+      
+      if (videoId) {
+        // Tự động phân tích thời lượng bằng thẻ iframe ẩn
+        message.loading({ content: 'Đang phân tích thời lượng video...', key: 'analyzing' });
+        calculatedDuration = await fetchYoutubeDurationWithIframe(videoId);
+        message.destroy('analyzing');
+      }
+      
       const res = await instructorService.addLessonVideo(
         selectedLessonForSettings.lessonId,
         { 
           youtubeUrl: youtubeUrlInput, 
           videoType: "YOUTUBE", 
-          durationMinutes: youtubeDurationInput || 0 
+          durationMinutes: calculatedDuration > 0 ? calculatedDuration : 10 // fallback
         }
       );
       if (res && res.success) {
-        message.success("Thêm video YouTube thành công!");
+        message.success(`Thêm video YouTube thành công! (Tự động tính: ${calculatedDuration > 0 ? calculatedDuration : 10} phút)`);
         setYoutubeUrlInput("");
-        setYoutubeDurationInput(0);
         setSelectedLessonForSettings((prev) => ({
           ...prev,
           videos: [...(prev.videos || []), res.data],
@@ -352,7 +442,84 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
   const openQuestionModal = () => {
     questionForm.resetFields();
     questionForm.setFieldsValue({ correctAnswer: 0 });
+    setEditingQuestionId(null);
     setIsQuestionModalVisible(true);
+  };
+
+  const openEditQuestionModal = (question) => {
+    questionForm.setFieldsValue({
+      questionText: question.questionText,
+      answer0: question.answers[0]?.answerText || "",
+      answer1: question.answers[1]?.answerText || "",
+      answer2: question.answers[2]?.answerText || "",
+      answer3: question.answers[3]?.answerText || "",
+      correctAnswer: question.answers.findIndex(a => a.isCorrect) !== -1 ? question.answers.findIndex(a => a.isCorrect) : 0
+    });
+    setEditingQuestionId(question.questionId);
+    setIsQuestionModalVisible(true);
+  };
+
+  const handleDeleteQuiz = (questionId) => {
+    confirm({
+      title: "Xóa câu hỏi",
+      content: "Bạn có chắc muốn xóa câu hỏi này?",
+      onOk: async () => {
+        try {
+          await instructorService.deleteQuestion(questionId);
+          message.success("Đã xóa câu hỏi thành công!");
+          setSelectedLessonForSettings((prev) => {
+             const newQuizzes = prev.quizzes.map(q => ({
+                ...q,
+                questions: q.questions.filter(quest => quest.questionId !== questionId)
+             })).filter(q => q.questions.length > 0);
+             return { ...prev, quizzes: newQuizzes };
+          });
+          if (onRefresh) onRefresh();
+        } catch (err) {
+          message.error("Lỗi khi xóa câu hỏi");
+        }
+      }
+    });
+  };
+
+  const handleDeleteVideo = (videoId) => {
+    confirm({
+      title: "Xóa video",
+      content: "Bạn có chắc muốn xóa video này khỏi bài giảng?",
+      onOk: async () => {
+        try {
+          await instructorService.deleteVideo(videoId);
+          message.success("Đã xóa video thành công!");
+          setSelectedLessonForSettings((prev) => ({
+             ...prev,
+             videos: prev.videos.filter(v => v.videoId !== videoId)
+          }));
+          if (onRefresh) onRefresh();
+        } catch (err) {
+          message.error("Lỗi khi xóa video");
+        }
+      }
+    });
+  };
+
+  const handleDeleteDocument = (assetId) => {
+    confirm({
+      title: "Xóa tài liệu",
+      content: "Bạn có chắc muốn xóa tài liệu đính kèm này?",
+      onOk: async () => {
+        try {
+          await instructorService.deleteDocument(assetId);
+          message.success("Đã xóa tài liệu thành công!");
+          setSelectedLessonForSettings((prev) => ({
+             ...prev,
+             documents: prev.documents.filter(d => d.documentId !== assetId)
+          }));
+          if (onRefresh) onRefresh();
+        } catch (err) {
+          message.error("Lỗi khi xóa tài liệu");
+        }
+      }
+    });
   };
 
   const handleCreateQuestion = async () => {
@@ -370,32 +537,56 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
         ],
       };
       setLoading(true);
-      const res = await instructorService.addLessonQuestion(
-        selectedLessonForSettings.lessonId,
-        payload,
-      );
-      if (res && res.success) {
-        message.success("Thêm câu hỏi thành công!");
-        setIsQuestionModalVisible(false);
-        questionForm.resetFields();
-        setSelectedLessonForSettings((prev) => {
-          const quizzes = [...(prev.quizzes || [])];
-          if (quizzes.length === 0) {
-            quizzes.push({
-              quizId: Date.now(),
-              title: "Bài tập trắc nghiệm",
-              questions: [res.data],
+
+      if (editingQuestionId) {
+        const res = await instructorService.updateQuestion(editingQuestionId, payload);
+        if (res && res.success) {
+          message.success("Cập nhật câu hỏi thành công!");
+          setIsQuestionModalVisible(false);
+          questionForm.resetFields();
+          setEditingQuestionId(null);
+          setSelectedLessonForSettings((prev) => {
+            const newQuizzes = prev.quizzes.map(q => {
+               const qIndex = q.questions.findIndex(quest => quest.questionId === editingQuestionId);
+               if (qIndex > -1) {
+                  const newQuestions = [...q.questions];
+                  newQuestions[qIndex] = res.data;
+                  return { ...q, questions: newQuestions };
+               }
+               return q;
             });
-          } else {
-            quizzes[0].questions = [...(quizzes[0].questions || []), res.data];
-          }
-          return { ...prev, quizzes };
-        });
-        if (onRefresh) onRefresh();
+            return { ...prev, quizzes: newQuizzes };
+          });
+          if (onRefresh) onRefresh();
+        }
+      } else {
+        const res = await instructorService.addLessonQuestion(
+          selectedLessonForSettings.lessonId,
+          payload,
+        );
+        if (res && res.success) {
+          message.success("Thêm câu hỏi thành công!");
+          setIsQuestionModalVisible(false);
+          questionForm.resetFields();
+          setSelectedLessonForSettings((prev) => {
+            const quizzes = [...(prev.quizzes || [])];
+            if (quizzes.length === 0) {
+              quizzes.push({
+                quizId: Date.now(),
+                title: "Bài tập trắc nghiệm",
+                questions: [res.data],
+              });
+            } else {
+              quizzes[0].questions = [...(quizzes[0].questions || []), res.data];
+            }
+            return { ...prev, quizzes };
+          });
+          if (onRefresh) onRefresh();
+        }
       }
     } catch (error) {
       if (!error.errorFields) {
-        message.error(error.message || "Lỗi khi tạo câu hỏi");
+        message.error(error.message || "Lỗi khi lưu câu hỏi");
       }
     } finally {
       setLoading(false);
@@ -879,13 +1070,13 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
                   itemLayout="horizontal"
                   dataSource={selectedLessonForSettings.quizzes}
                   renderItem={(item) => (
-                    <List.Item
-                      style={{ backgroundColor: "#f8fafc", padding: "12px 16px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #e2e8f0" }}
-                      actions={[
-                        <Button type="text" size="small" icon={<EditOutlined style={{ color: "#3b82f6" }} />} key="edit" />,
-                        <Button danger type="text" size="small" icon={<DeleteOutlined />} key="delete" />,
-                      ]}
-                    >
+                      <List.Item
+                        style={{ backgroundColor: "#f8fafc", padding: "12px 16px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #e2e8f0" }}
+                        actions={[
+                          <Button type="text" size="small" icon={<EditOutlined style={{ color: "#3b82f6" }} />} onClick={() => openEditQuestionModal(item.questions?.[0])} key="edit" />,
+                          <Button danger type="text" size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteQuiz(item.questions?.[0]?.questionId)} key="delete" />,
+                        ]}
+                      >
                       <List.Item.Meta
                         avatar={
                           <div style={{ width: "40px", height: "40px", backgroundColor: "#e0f2fe", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#0ea5e9", fontWeight: "bold", fontSize: "16px" }}>Q</div>
@@ -931,17 +1122,10 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
                 </div>
                 <div style={{ display: "flex", gap: "16px", alignItems: "flex-end" }}>
                   <div style={{ flex: 1 }}>
-                    <Text strong style={{ display: "block", marginBottom: "8px" }}>Thời lượng (phút)</Text>
-                    <InputNumber 
-                      min={0} 
-                      value={youtubeDurationInput} 
-                      onChange={setYoutubeDurationInput} 
-                      style={{ width: "100%" }} 
-                    />
+                    <Button type="primary" onClick={handleAddYoutubeVideo} loading={loading} icon={<PlusOutlined />} style={{ width: '100%' }}>
+                      Tự động phân tích & Thêm Video
+                    </Button>
                   </div>
-                  <Button type="primary" onClick={handleAddYoutubeVideo} loading={loading} icon={<PlusOutlined />}>
-                    Thêm Video
-                  </Button>
                 </div>
               </div>
               
@@ -998,17 +1182,27 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
                   <List
                     itemLayout="horizontal"
                     dataSource={selectedLessonForSettings.documents}
-                    renderItem={(item) => (
-                      <List.Item
-                        style={{ backgroundColor: "#fff", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "8px" }}
-                        actions={[<Button danger type="text" size="small" icon={<DeleteOutlined />} key="delete" />]}
-                      >
-                        <List.Item.Meta
-                          avatar={<div style={{ width: "40px", height: "40px", backgroundColor: "#d1fae5", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}><FileTextFilled style={{ color: "#10b981", fontSize: "18px" }} /></div>}
-                          title={<a href={item.fileUrl?.startsWith("http") ? item.fileUrl : `http://localhost:9000/elearning/${item.fileUrl}`} target="_blank" rel="noreferrer" style={{ fontSize: "13px", wordBreak: "break-all", fontWeight: 500 }}>{item.title}</a>}
-                        />
-                      </List.Item>
-                    )}
+                    renderItem={(item) => {
+                      const fileUrl = item.fileUrl?.startsWith("http") ? item.fileUrl : `http://localhost:9000/elearning/${item.fileUrl}`;
+                      const isPdf = item.fileName?.toLowerCase().endsWith('.pdf') || item.fileUrl?.toLowerCase().endsWith('.pdf');
+                      return (
+                        <List.Item
+                          style={{ backgroundColor: "#fff", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "8px" }}
+                          actions={[<Button danger type="text" size="small" icon={<DeleteOutlined />} onClick={() => handleDeleteDocument(item.documentId)} key="delete" />]}
+                        >
+                          <List.Item.Meta
+                            avatar={<div style={{ width: "40px", height: "40px", backgroundColor: "#d1fae5", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}><FileTextFilled style={{ color: "#10b981", fontSize: "18px" }} /></div>}
+                            title={<span style={{ fontSize: "13px", wordBreak: "break-all", fontWeight: 500 }}>{item.title}</span>}
+                            description={
+                              <a href={fileUrl} target="_blank" rel="noreferrer" download={!isPdf} style={{ fontSize: "12px", color: "#3b82f6", display: "inline-flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
+                                {isPdf ? <EyeOutlined /> : <DownloadOutlined />}
+                                {isPdf ? "Xem trước" : "Tải xuống"}
+                              </a>
+                            }
+                          />
+                        </List.Item>
+                      );
+                    }}
                   />
                 ) : (
                   <div style={{ padding: "16px", textAlign: "center", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px dashed #e2e8f0" }}>
@@ -1120,19 +1314,41 @@ const CurriculumTab = ({ courseData, courseId, onRefresh }) => {
         }}
       >
         {previewVideoUrl && (
-          <video
-            src={previewVideoUrl}
-            controls
-            autoPlay
-            style={{
-              width: "100%",
-              height: "auto",
-              display: "block",
-              maxHeight: "80vh",
-            }}
-          >
-            Trình duyệt của bạn không hỗ trợ thẻ video.
-          </video>
+          previewVideoUrl.includes("youtube.com") || previewVideoUrl.includes("youtu.be") ? (
+            (() => {
+              const match = previewVideoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+              const videoId = match ? match[1] : null;
+              if (videoId) {
+                return (
+                  <iframe
+                    width="100%"
+                    height="450"
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ display: "block", borderRadius: "8px" }}
+                  ></iframe>
+                );
+              }
+              return <div style={{ color: "white", padding: "20px", textAlign: "center" }}>Link YouTube không hợp lệ</div>;
+            })()
+          ) : (
+            <video
+              src={previewVideoUrl}
+              controls
+              autoPlay
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                maxHeight: "80vh",
+              }}
+            >
+              Trình duyệt của bạn không hỗ trợ thẻ video.
+            </video>
+          )
         )}
       </Modal>
     </div>

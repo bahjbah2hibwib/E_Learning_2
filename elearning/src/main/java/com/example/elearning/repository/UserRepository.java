@@ -23,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRoleAndStatus(UserRole role, Boolean status);
     long countByRole(UserRole role);
     long countByCreatedAtAfter(LocalDateTime date);
+    long countByRoleAndCreatedAtAfter(UserRole role, LocalDateTime date);
+    long countByRoleAndCreatedAtBetween(UserRole role, LocalDateTime startDate, LocalDateTime endDate);
     java.util.List<User> findByRole(UserRole role);
 
     @Query("SELECT u FROM User u WHERE " +

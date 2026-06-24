@@ -11,6 +11,8 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import notificationService from '../../services/notificationService';
+import webSocketService from '../../services/webSocketService';
+import ProfileModal from './ProfileModal';
 
 const { Text } = Typography;
 
@@ -34,6 +36,8 @@ const TopBar = ({ userRole = 'Admin', userName = 'Tài khoản', leftContent }) 
   // Dữ liệu người dùng từ localStorage
   const [localUserName, setLocalUserName] = useState(userName);
   const [localUserRole, setLocalUserRole] = useState(userRole);
+  const [localAvatar, setLocalAvatar] = useState(null);
+  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
 
   useEffect(() => {
     fetchNotifications(true); // Lần đầu tiên load thì hiện loading
@@ -51,9 +55,28 @@ const TopBar = ({ userRole = 'Admin', userName = 'Tài khoản', leftContent }) 
        else setLocalUserRole(storedRole);
     }
     
-    // Polling ngầm mỗi 10 giây một lần (Không hiện loading để tránh giật lag UI)
-    const interval = setInterval(() => fetchNotifications(false), 5000);
-    return () => clearInterval(interval);
+    let unsubscribe = null;
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const userObj = JSON.parse(userStr);
+        if (userObj && userObj.avatarUrl) {
+          setLocalAvatar(userObj.avatarUrl);
+        }
+        if (userObj && userObj.userId) {
+          // Subscribe realtime notifications
+          unsubscribe = webSocketService.subscribe(`/topic/notifications/${userObj.userId}`, (newNotif) => {
+            // Có thông báo mới -> Tăng chuông, thêm vào đầu mảng
+            setUnreadCount(prev => prev + 1);
+            setNotifications(prev => [newNotif, ...prev].slice(0, 5)); // Giữ 5 cái mới nhất
+          });
+        }
+      }
+    } catch (e) {}
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const fetchNotifications = async (showLoading = false) => {
@@ -97,8 +120,9 @@ const TopBar = ({ userRole = 'Admin', userName = 'Tài khoản', leftContent }) 
     if (e.key === 'logout') {
       localStorage.removeItem('accessToken');
       navigate('/login');
+    } else if (e.key === 'settings') {
+      setIsProfileModalVisible(true);
     }
-    // Handle other actions like settings if needed
   };
 
   const items = [
@@ -211,10 +235,27 @@ const TopBar = ({ userRole = 'Admin', userName = 'Tài khoản', leftContent }) 
               <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '14px', lineHeight: '1.2' }}>{localUserName}</span>
               <span style={{ color: '#64748b', fontSize: '12px' }}>{localUserRole}</span>
             </div>
-            <Avatar size="large" icon={<UserOutlined />} style={{ backgroundColor: '#3b82f6', border: '2px solid #eff6ff' }} />
+            <Avatar size="large" src={localAvatar} icon={<UserOutlined />} style={{ backgroundColor: '#3b82f6', border: '2px solid #eff6ff' }} />
           </div>
         </Dropdown>
       </Space>
+
+      <ProfileModal 
+        visible={isProfileModalVisible} 
+        onClose={(success) => {
+          setIsProfileModalVisible(false);
+          if (success) {
+            // Cập nhật lại UI sau khi update thành công
+            const storedName = localStorage.getItem('userName');
+            if (storedName) setLocalUserName(storedName);
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+              const userObj = JSON.parse(userStr);
+              if (userObj.avatarUrl) setLocalAvatar(userObj.avatarUrl);
+            }
+          }
+        }} 
+      />
     </div>
   );
 };

@@ -11,7 +11,8 @@ import {
   DownloadOutlined,
   LockOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
+  EyeOutlined
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import userService from '../../services/userService';
@@ -243,14 +244,40 @@ const LearningPage = () => {
             {activeLesson?.lessonType === 'VIDEO' ? (
               <div style={{ background: '#000', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16/9', marginBottom: '32px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                  {activeLesson.videos && activeLesson.videos.length > 0 ? (
-                    <video 
-                      controls 
-                      controlsList="nodownload"
-                      style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: 'black' }}
-                      src={activeLesson.videos[0].videoUrl?.startsWith('http') ? activeLesson.videos[0].videoUrl : `http://localhost:9000/elearning/${activeLesson.videos[0].videoUrl}`}
-                    >
-                      Trình duyệt của bạn không hỗ trợ thẻ video.
-                    </video>
+                    (() => {
+                      const rawUrl = activeLesson.videos[0].videoUrl;
+                      const isYoutube = rawUrl?.includes("youtube.com") || rawUrl?.includes("youtu.be");
+                      if (isYoutube) {
+                        const match = rawUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                        const videoId = match ? match[1] : null;
+                        if (videoId) {
+                          return (
+                            <iframe
+                              key={videoId}
+                              width="100%"
+                              height="100%"
+                              src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                              title="YouTube video player"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              style={{ border: 'none', objectFit: 'contain' }}
+                            ></iframe>
+                          );
+                        }
+                      }
+                      return (
+                        <video 
+                          key={rawUrl}
+                          controls 
+                          controlsList="nodownload"
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: 'black' }}
+                          src={rawUrl?.startsWith('http') ? rawUrl : `http://localhost:9000/elearning/${rawUrl}`}
+                        >
+                          Trình duyệt của bạn không hỗ trợ thẻ video.
+                        </video>
+                      );
+                    })()
                  ) : (
                    <div style={{ color: '#fff', textAlign: 'center' }}>
                       <PlayCircleOutlined style={{ fontSize: '64px', color: '#3b82f6', marginBottom: '16px', cursor: 'pointer' }} />
@@ -324,17 +351,28 @@ const LearningPage = () => {
                 <div style={{ marginTop: '32px' }}>
                   <Title level={5} style={{ marginBottom: '16px' }}>Tài liệu đính kèm ({activeLesson.documents.length})</Title>
                   <Space direction="vertical" style={{ width: '100%' }}>
-                    {activeLesson.documents.map((doc) => (
-                      <div key={doc.documentId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        <Space>
-                          <FileTextOutlined style={{ fontSize: '20px', color: '#64748b' }} />
-                          <Text strong style={{ color: '#334155' }}>{doc.title || doc.fileName}</Text>
-                        </Space>
-                        <Button type="link" icon={<DownloadOutlined />} href={doc.fileUrl?.startsWith('http') ? doc.fileUrl : `http://localhost:9000/elearning/${doc.fileUrl}`} target="_blank">
-                          Tải xuống
-                        </Button>
-                      </div>
-                    ))}
+                    {activeLesson.documents.map((doc) => {
+                      const fileUrl = doc.fileUrl?.startsWith('http') ? doc.fileUrl : `http://localhost:9000/elearning/${doc.fileUrl}`;
+                      const isPdf = doc.fileName?.toLowerCase().endsWith('.pdf') || doc.fileUrl?.toLowerCase().endsWith('.pdf');
+                      
+                      return (
+                        <div key={doc.documentId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                          <Space>
+                            <FileTextOutlined style={{ fontSize: '20px', color: '#64748b' }} />
+                            <Text strong style={{ color: '#334155' }}>{doc.title || doc.fileName}</Text>
+                          </Space>
+                          <Button 
+                            type="link" 
+                            icon={isPdf ? <EyeOutlined /> : <DownloadOutlined />} 
+                            href={fileUrl} 
+                            target="_blank"
+                            download={!isPdf}
+                          >
+                            {isPdf ? 'Xem trước' : 'Tải xuống'}
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </Space>
                 </div>
               )}

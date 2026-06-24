@@ -20,6 +20,8 @@ import {
   ClockCircleOutlined,
   FolderOpenOutlined,
   DownloadOutlined,
+  CheckCircleOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
@@ -78,20 +80,46 @@ const CourseCurriculum = ({ curriculum }) => {
               }}
             >
               {selectedLesson.videos && selectedLesson.videos.length > 0 ? (
-                <video
-                  src={
-                    selectedLesson.videos[0].videoUrl?.startsWith("http")
-                      ? selectedLesson.videos[0].videoUrl
-                      : `http://localhost:9000/elearning/${selectedLesson.videos[0].videoUrl}`
+                (() => {
+                  const rawUrl = selectedLesson.videos[0].videoUrl;
+                  const isYoutube = rawUrl?.includes("youtube.com") || rawUrl?.includes("youtu.be");
+                  if (isYoutube) {
+                    const match = rawUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                    const videoId = match ? match[1] : null;
+                    if (videoId) {
+                      return (
+                        <iframe
+                          key={videoId}
+                          width="100%"
+                          height="100%"
+                          src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                          title="YouTube video player"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          style={{ border: 'none', objectFit: 'contain' }}
+                        ></iframe>
+                      );
+                    }
                   }
-                  controls
-                  controlsList="nodownload"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                  }}
-                />
+                  return (
+                    <video
+                      key={rawUrl}
+                      src={
+                        rawUrl?.startsWith("http")
+                          ? rawUrl
+                          : `http://localhost:9000/elearning/${rawUrl}`
+                      }
+                      controls
+                      controlsList="nodownload"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  );
+                })()
               ) : (
                 <div
                   style={{
@@ -203,37 +231,38 @@ const CourseCurriculum = ({ curriculum }) => {
                                     <div
                                       style={{
                                         padding: "12px 16px",
-                                        background: "#f8fafc",
-                                        border: "1px solid #e2e8f0",
+                                        background: answer.isCorrect ? "#f0fdf4" : "#f8fafc",
+                                        border: `1px solid ${answer.isCorrect ? "#22c55e" : "#e2e8f0"}`,
                                         borderRadius: "8px",
                                         display: "flex",
                                         gap: "12px",
                                         transition: "all 0.2s",
                                         cursor: "default",
+                                        boxShadow: answer.isCorrect ? "0 0 0 1px #22c55e" : "none"
                                       }}
                                       onMouseOver={(e) => {
-                                        e.currentTarget.style.borderColor =
-                                          "#cbd5e1";
-                                        e.currentTarget.style.background =
-                                          "#f1f5f9";
+                                        if (!answer.isCorrect) {
+                                          e.currentTarget.style.borderColor = "#cbd5e1";
+                                          e.currentTarget.style.background = "#f1f5f9";
+                                        }
                                       }}
                                       onMouseOut={(e) => {
-                                        e.currentTarget.style.borderColor =
-                                          "#e2e8f0";
-                                        e.currentTarget.style.background =
-                                          "#f8fafc";
+                                        if (!answer.isCorrect) {
+                                          e.currentTarget.style.borderColor = "#e2e8f0";
+                                          e.currentTarget.style.background = "#f8fafc";
+                                        }
                                       }}
                                     >
                                       <div
                                         style={{
-                                          color: "#64748b",
+                                          color: answer.isCorrect ? "#16a34a" : "#64748b",
                                           fontWeight: 600,
                                         }}
                                       >
                                         {String.fromCharCode(65 + aIdx)}.
                                       </div>
-                                      <Text style={{ color: "#334155" }}>
-                                        {answer.answerText}
+                                      <Text style={{ color: answer.isCorrect ? "#15803d" : "#334155", fontWeight: answer.isCorrect ? 500 : 400 }}>
+                                        {answer.answerText} {answer.isCorrect && <CheckCircleOutlined style={{ color: "#22c55e", marginLeft: 8 }} />}
                                       </Text>
                                     </div>
                                   </Col>
@@ -299,6 +328,7 @@ const CourseCurriculum = ({ curriculum }) => {
                       const docSrc = doc.fileUrl?.startsWith("http")
                         ? doc.fileUrl
                         : `http://localhost:9000/elearning/${doc.fileUrl}`;
+                      const isPdf = doc.fileName?.toLowerCase().endsWith('.pdf') || doc.fileUrl?.toLowerCase().endsWith('.pdf');
                       return (
                         <List.Item
                           style={{
@@ -356,6 +386,7 @@ const CourseCurriculum = ({ curriculum }) => {
                                 href={docSrc}
                                 target="_blank"
                                 rel="noreferrer"
+                                download={!isPdf}
                                 style={{
                                   fontSize: "12px",
                                   color: "#3b82f6",
@@ -366,7 +397,8 @@ const CourseCurriculum = ({ curriculum }) => {
                                   marginTop: "4px",
                                 }}
                               >
-                                <DownloadOutlined /> Tải xuống
+                                {isPdf ? <EyeOutlined /> : <DownloadOutlined />} 
+                                {isPdf ? " Xem trước" : " Tải xuống"}
                               </a>
                             }
                           />

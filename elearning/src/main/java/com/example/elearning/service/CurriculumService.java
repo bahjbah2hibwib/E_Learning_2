@@ -16,4 +16,6 @@ public interface CurriculumService {
     CourseAdminDetailResponseDto.QuestionDto addQuestionToLesson(Long lessonId, com.example.elearning.dto.request.QuestionAddRequestDto requestDto, Long userId);
     CourseAdminDetailResponseDto.QuestionDto updateQuestion(Long questionId, com.example.elearning.dto.request.QuestionUpdateRequestDto requestDto, Long userId);
     void deleteQuestion(Long questionId, Long userId);
+    void deleteVideo(Long videoId, Long userId);
+    void deleteDocument(Long assetId, Long userId);
 }

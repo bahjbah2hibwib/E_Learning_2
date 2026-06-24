@@ -30,6 +30,7 @@ import com.example.elearning.repository.QuizRepository;
 import com.example.elearning.repository.QuestionRepository;
 import com.example.elearning.repository.AnswerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +51,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseAdminDetailResponseDto.SectionDto createSection(Long courseId, SectionCreateRequestDto requestDto, Long userId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course", "id: " + courseId));
@@ -72,6 +74,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseAdminDetailResponseDto.SectionDto updateSection(Long sectionId, SectionCreateRequestDto requestDto, Long userId) {
         Section section = sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Section", "id: " + sectionId));
@@ -90,6 +93,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseAdminDetailResponseDto.LessonDto createLesson(Long sectionId, LessonCreateRequestDto requestDto, Long userId) {
         Section section = sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Section", "id: " + sectionId));
@@ -160,6 +164,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseAdminDetailResponseDto.VideoDto addVideoToLesson(Long lessonId, VideoAddRequestDto requestDto, Long userId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", "id: " + lessonId));
@@ -202,6 +207,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public CourseAdminDetailResponseDto.DocumentDto addDocumentToLesson(Long lessonId, DocumentAddRequestDto requestDto, Long userId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson", "id: " + lessonId));
@@ -366,6 +372,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"publicCourses", "publicCourseDetail"}, allEntries = true)
     public void deleteQuestion(Long questionId, Long userId) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question", "id: " + questionId));
@@ -375,5 +382,31 @@ public class CurriculumServiceImpl implements CurriculumService {
         }
 
         questionRepository.delete(question);
+    }
+
+    @Override
+    @Transactional
+    public void deleteVideo(Long videoId, Long userId) {
+        Video video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Video", "id: " + videoId));
+
+        if (!video.getLesson().getSection().getCourse().getInstructor().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Chỉ giảng viên tạo khóa học mới được xóa", "FORBIDDEN_ACCESS");
+        }
+
+        videoRepository.delete(video);
+    }
+
+    @Override
+    @Transactional
+    public void deleteDocument(Long assetId, Long userId) {
+        LessonAsset asset = lessonAssetRepository.findById(assetId)
+                .orElseThrow(() -> new ResourceNotFoundException("LessonAsset", "id: " + assetId));
+
+        if (!asset.getLesson().getSection().getCourse().getInstructor().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Chỉ giảng viên tạo khóa học mới được xóa", "FORBIDDEN_ACCESS");
+        }
+
+        lessonAssetRepository.delete(asset);
     }
 }

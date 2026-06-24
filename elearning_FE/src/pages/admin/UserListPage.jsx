@@ -19,6 +19,7 @@ const UserListPage = () => {
   // --- B. Quản lý Trạng thái (State Management) ---
   const [loading, setLoading] = useState(false);
   const [statsData, setStatsData] = useState(null);
+  const [dateRange, setDateRange] = useState(null);
   const [userList, setUserList] = useState([]);
   const [filters, setFilters] = useState({ role: '', status: '' });
   const [pagination, setPagination] = useState({ page: 0, size: 10, total: 0 });
@@ -34,9 +35,12 @@ const UserListPage = () => {
   const fetchData = async (isPolling = false) => {
     if (!isPolling) setLoading(true);
     try {
+      const startDate = dateRange && dateRange[0] ? dateRange[0].startOf('day').toISOString() : null;
+      const endDate = dateRange && dateRange[1] ? dateRange[1].endOf('day').toISOString() : null;
+
       // Chạy song song 2 API: Lấy số lượng thẻ (Stats) và Lấy danh sách bảng (Users)
       const [statsRes, usersRes] = await Promise.all([
-        userService.getUserStats().catch(() => null), // Tạm thời bỏ qua lỗi nếu Backend chưa có API này
+        userService.getUserStats(startDate, endDate).catch(() => null), // Lấy theo ngày
         userService.getAllUsers({
           page: pagination.page,
           size: pagination.size,
@@ -91,7 +95,7 @@ const UserListPage = () => {
       if (unsubscribe) unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.size, filters.role, filters.status]);
+  }, [pagination.page, pagination.size, filters.role, filters.status, dateRange]);
 
   // Sự kiện 2: Khi user thay đổi bộ lọc
   const handleFilterChange = (newFilters) => {
@@ -216,7 +220,11 @@ const UserListPage = () => {
       {/* Khối 1: Header - Đã chuyển nút xuống bộ lọc */}
 
       {/* Khối 2: 4 Thẻ thống kê */}
-      <UserStatsCards stats={statsData} />
+      <UserStatsCards 
+        stats={statsData}
+        dateRange={dateRange}
+        onDateRangeChange={(dates) => setDateRange(dates)}
+      />
 
       {/* Khối lớn chứa Bảng và Bộ lọc (Có viền mỏng và bo góc chung) */}
       <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>

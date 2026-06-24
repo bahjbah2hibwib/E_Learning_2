@@ -25,6 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
     private final com.example.elearning.repository.UserRepository userRepository;
+    private final org.springframework.messaging.simp.SimpMessageSendingOperations messagingTemplate;
 
     @Override
     public PageResponseDto<NotificationResponseDto> getMyNotifications(Long userId, int page, int size) {
@@ -84,9 +85,13 @@ public class NotificationServiceImpl implements NotificationService {
                 .type(type)
                 .isRead(false)
                 .build();
-        notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
         
-        // Gọi WebSocket để gửi thông báo realtime (nếu có)
+        // Gọi WebSocket để gửi thông báo realtime
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + targetUserId,
+                notificationMapper.toNotificationResponseDto(savedNotification)
+        );
     }
 
     @Override
@@ -103,6 +108,14 @@ public class NotificationServiceImpl implements NotificationService {
                 .build()
         ).collect(Collectors.toList());
         
-        notificationRepository.saveAll(notifications);
+        List<Notification> savedNotifications = notificationRepository.saveAll(notifications);
+        
+        // Push realtime to all matched users
+        savedNotifications.forEach(saved -> {
+            messagingTemplate.convertAndSend(
+                    "/topic/notifications/" + saved.getUser().getUserId(),
+                    notificationMapper.toNotificationResponseDto(saved)
+            );
+        });
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Typography, Row, Col, Card, Button, Input, Radio, Space, Divider, message, Spin
+  Typography, Row, Col, Card, Button, Input, Radio, Space, Divider, message, Spin, Select, Checkbox
 } from 'antd';
 import { 
   ArrowLeftOutlined, 
@@ -24,11 +24,18 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(true);
   const [payLoading, setPayLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('momo');
-  const [note, setNote] = useState('');
   const [discountCode, setDiscountCode] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [billingName, setBillingName] = useState('');
+  const [billingPhone, setBillingPhone] = useState('');
 
   useEffect(() => {
     fetchCourseDetail();
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      setBillingName(user.fullName || '');
+      setBillingPhone(user.phone || '');
+    }
   }, [id]);
 
   const fetchCourseDetail = async () => {
@@ -145,14 +152,45 @@ const CheckoutPage = () => {
                 </div>
 
                 <div style={{ marginBottom: '32px' }}>
-                  <Text strong style={{ display: 'block', marginBottom: '8px', fontSize: '15px' }}>Ghi chú đơn hàng (Tùy chọn)</Text>
-                  <TextArea 
-                    rows={3} 
-                    placeholder="Bạn có yêu cầu đặc biệt gì không?" 
-                    style={{ borderRadius: '0', borderColor: '#1c1d1f' }}
-                    value={note}
-                    onChange={e => setNote(e.target.value)}
+                  <Text strong style={{ display: 'block', marginBottom: '8px', fontSize: '15px' }}>Quốc gia</Text>
+                  <Select 
+                    defaultValue="vn"
+                    size="large"
+                    style={{ width: '100%', height: '48px' }}
+                    options={[
+                      { value: 'vn', label: 'Việt Nam' },
+                      { value: 'us', label: 'Hoa Kỳ' },
+                      { value: 'jp', label: 'Nhật Bản' },
+                    ]}
                   />
+                  <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginTop: '8px' }}>
+                    EduFlow được yêu cầu thu thuế giao dịch áp dụng đối với các giao dịch mua sắm tại một số khu vực tài phán nhất định.
+                  </Text>
+                </div>
+
+                <Title level={3} style={{ marginBottom: '24px', fontWeight: 700, marginTop: '48px' }}>Chi tiết thanh toán</Title>
+                
+                <div style={{ display: 'flex', gap: '16px', marginBottom: '32px' }}>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ display: 'block', marginBottom: '8px', fontSize: '15px' }}>Họ và tên</Text>
+                    <Input 
+                      size="large" 
+                      placeholder="Nhập họ và tên..." 
+                      style={{ borderRadius: '0', height: '48px', borderColor: '#1c1d1f' }} 
+                      value={billingName}
+                      onChange={(e) => setBillingName(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ display: 'block', marginBottom: '8px', fontSize: '15px' }}>Số điện thoại</Text>
+                    <Input 
+                      size="large" 
+                      placeholder="Nhập số điện thoại..." 
+                      style={{ borderRadius: '0', height: '48px', borderColor: '#1c1d1f' }} 
+                      value={billingPhone}
+                      onChange={(e) => setBillingPhone(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <Title level={3} style={{ marginBottom: '24px', fontWeight: 700, marginTop: '48px' }}>Phương thức thanh toán</Title>
@@ -235,23 +273,34 @@ const CheckoutPage = () => {
                   <Text strong style={{ fontSize: '24px', color: '#1c1d1f' }}>{formattedPrice}</Text>
                 </div>
 
+                <div style={{ marginBottom: '16px' }}>
+                  <Checkbox checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)}>
+                    <Text style={{ fontSize: '14px', color: '#1c1d1f' }}>
+                      Bằng việc hoàn tất giao dịch mua, bạn đồng ý với <Link to="#" style={{ color: '#5624d0', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> và <Link to="#" style={{ color: '#5624d0', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của EduFlow.
+                    </Text>
+                  </Checkbox>
+                </div>
+
                 <Button 
                   type="primary" 
                   block 
                   loading={payLoading}
                   onClick={handlePayment}
+                  disabled={!agreedToTerms}
                   style={{ 
                     height: '56px', 
                     borderRadius: '0', 
                     fontSize: '16px', 
                     fontWeight: 700,
-                    background: '#a435f0',
-                    borderColor: '#a435f0',
+                    background: agreedToTerms ? '#a435f0' : '#d1d7dc',
+                    borderColor: agreedToTerms ? '#a435f0' : '#d1d7dc',
+                    color: agreedToTerms ? '#fff' : '#6a6f73',
                     boxShadow: 'none',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    cursor: agreedToTerms ? 'pointer' : 'not-allowed'
                   }}
                 >
                   Hoàn tất thanh toán
@@ -259,7 +308,7 @@ const CheckoutPage = () => {
 
                 <div style={{ textAlign: 'center', marginTop: '16px' }}>
                   <Text type="secondary" style={{ fontSize: '12px', lineHeight: '1.5' }}>
-                    Bằng việc hoàn tất giao dịch mua, bạn đồng ý với <Link to="#" style={{ color: '#5624d0', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> này.
+                    EduFlow cam kết bảo mật mọi thông tin thẻ tín dụng / ghi nợ của bạn bằng công nghệ mã hóa tối tân nhất.
                   </Text>
                 </div>
               </div>

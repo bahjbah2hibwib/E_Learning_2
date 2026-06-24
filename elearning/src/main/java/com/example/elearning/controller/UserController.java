@@ -132,9 +132,32 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<Map<String, Object>> updateProfile(
+            @Valid @RequestBody com.example.elearning.dto.request.UserProfileUpdateRequestDto requestDto,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        Long currentUserId = null;
+        if (auth != null && auth.getPrincipal() instanceof Long) {
+            currentUserId = (Long) auth.getPrincipal();
+        }
+
+        com.example.elearning.dto.response.UserDetailResponseDto data = userService.updateProfile(currentUserId, requestDto);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Cập nhật thông tin cá nhân thành công");
+        response.put("data", data);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getUserStats(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate) {
         
         // Bước 1: Trích xuất role hiện tại từ SecurityContext
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
@@ -144,7 +167,7 @@ public class UserController {
         }
 
         // Bước 2: Gọi Service lấy thống kê
-        com.example.elearning.dto.response.UserStatsResponseDto data = userService.getUserStats(currentRole);
+        com.example.elearning.dto.response.UserStatsResponseDto data = userService.getUserStats(currentRole, startDate, endDate);
 
         // Bước 3: Đóng gói phản hồi
         Map<String, Object> response = new HashMap<>();

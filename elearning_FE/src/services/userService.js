@@ -9,9 +9,12 @@ const userService = {
   },
 
   // 2. Lấy số liệu cho 4 thẻ thống kê trên cùng
-  getUserStats: () => {
+  getUserStats: (startDate, endDate) => {
     const url = '/users/stats';
-    return axiosClient.get(url);
+    const params = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    return axiosClient.get(url, { params });
   },
 
   // 3. Tạo người dùng mới (Dành riêng cho Admin)
@@ -71,6 +74,12 @@ const userService = {
   completeLesson: (userId, lessonId) => {
     const url = `/users/${userId}/lessons/${lessonId}/complete`;
     return axiosClient.post(url);
+  },
+
+  // 12. Cập nhật thông tin cá nhân
+  updateProfile: (data) => {
+    const url = '/users/profile';
+    return axiosClient.put(url, data);
   }
 };
 

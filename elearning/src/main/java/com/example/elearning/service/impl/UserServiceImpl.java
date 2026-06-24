@@ -289,9 +289,65 @@ public class UserServiceImpl implements UserService {
 
         return responseDto;
     }
+    @Override
+    @Transactional
+    public UserDetailResponseDto updateProfile(Long currentUserId, com.example.elearning.dto.request.UserProfileUpdateRequestDto requestDto) {
+        if (currentUserId == null) {
+            throw new AccessDeniedException(
+                    "Người dùng chưa đăng nhập.",
+                    "UNAUTHORIZED"
+            );
+        }
+
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Không tìm thấy người dùng",
+                        "USER_NOT_FOUND"
+                ));
+
+        if (requestDto.getPhone() != null && userRepository.existsByPhoneAndUserIdNot(requestDto.getPhone(), currentUserId)) {
+            throw new UserAlreadyExistsException("Số điện thoại đã được sử dụng bởi tài khoản khác.", "USER_ALREADY_EXISTS");
+        }
+
+        FileEntity avatarFile = null;
+        if (requestDto.getAvatarFileId() != null) {
+            avatarFile = fileRepository.findById(requestDto.getAvatarFileId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Không tìm thấy file ảnh với ID đã cho",
+                            "FILE_NOT_FOUND"
+                    ));
+        }
+
+        user.setFullName(requestDto.getFullName());
+        if (requestDto.getPhone() != null) {
+            user.setPhone(requestDto.getPhone());
+        }
+        if (requestDto.getDateOfBirth() != null) {
+            user.setDateOfBirth(requestDto.getDateOfBirth());
+        }
+        if (requestDto.getPassword() != null && !requestDto.getPassword().isEmpty()) {
+            user.setPasswordHash(passwordEncoder.encode(requestDto.getPassword()));
+        }
+        if (avatarFile != null) {
+            user.setAvatarFile(avatarFile);
+        }
+
+        User savedUser = userRepository.save(user);
+
+        UserDetailResponseDto responseDto = userMapper.toUserDetailResponseDto(savedUser);
+        if (savedUser.getAvatarFile() != null) {
+            try {
+                String avatarUrl = minioService.getPreSignedUrl(savedUser.getAvatarFile().getFilePath());
+                responseDto.setAvatarUrl(avatarUrl);
+            } catch (Exception e) {
+                // Bỏ qua lỗi lấy URL ảnh
+            }
+        }
+        return responseDto;
+    }
 
     @Override
-    public UserStatsResponseDto getUserStats(String currentRole) {
+    public UserStatsResponseDto getUserStats(String currentRole, String startDateStr, String endDateStr) {
         // Kiểm tra quyền
         boolean isAdmin = "ROLE_ADMIN".equals(currentRole);
         boolean isSuperAdmin = "ROLE_SUPER_ADMIN".equals(currentRole);
@@ -303,18 +359,39 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        long total = userRepository.count();
+        long totalStudents = userRepository.countByRole(UserRole.ROLE_STUDENT);
         long activeStudents = userRepository.countByRoleAndStatus(UserRole.ROLE_STUDENT, true);
         long totalInstructors = userRepository.countByRole(UserRole.ROLE_INSTRUCTOR);
-        // Thống kê đăng ký mới trong vòng 30 ngày qua
-        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
-        long newUsers = userRepository.countByCreatedAtAfter(thirtyDaysAgo);
+        
+        LocalDateTime startDate = null;
+        LocalDateTime endDate = null;
+        
+        try {
+            if (startDateStr != null && !startDateStr.isEmpty()) {
+                startDate = LocalDateTime.parse(startDateStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+            }
+            if (endDateStr != null && !endDateStr.isEmpty()) {
+                endDate = LocalDateTime.parse(endDateStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+            }
+        } catch (Exception e) {
+            // fallback to default
+        }
+
+        long newStudentsThisMonth = 0;
+        if (startDate != null && endDate != null) {
+            newStudentsThisMonth = userRepository.countByRoleAndCreatedAtBetween(UserRole.ROLE_STUDENT, startDate, endDate);
+        } else if (startDate != null) {
+            newStudentsThisMonth = userRepository.countByRoleAndCreatedAtAfter(UserRole.ROLE_STUDENT, startDate);
+        } else {
+            // Default 30 days
+            newStudentsThisMonth = userRepository.countByRoleAndCreatedAtAfter(UserRole.ROLE_STUDENT, LocalDateTime.now().minusDays(30));
+        }
 
         return UserStatsResponseDto.builder()
-                .total(total)
+                .totalStudents(totalStudents)
                 .activeStudents(activeStudents)
                 .totalInstructors(totalInstructors)
-                .newUsers(newUsers)
+                .newStudentsThisMonth(newStudentsThisMonth)
                 .build();
     }
 

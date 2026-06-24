@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserStatsResponseDto {
-    private Long total;
+    private Long totalStudents;
     private Long activeStudents;
     private Long totalInstructors;
-    private Long newUsers;
+    private Long newStudentsThisMonth;
 }

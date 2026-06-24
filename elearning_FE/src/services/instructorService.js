@@ -109,6 +109,30 @@ const instructorService = {
     return axiosClient.delete(url);
   },
 
+  // Xóa video
+  deleteVideo: (videoId) => {
+    const url = `/instructor/videos/${videoId}`;
+    return axiosClient.delete(url);
+  },
+
+  // Xóa tài liệu
+  deleteDocument: (assetId) => {
+    const url = `/instructor/documents/${assetId}`;
+    return axiosClient.delete(url);
+  },
+
+  // Cập nhật câu hỏi
+  updateQuestion: (questionId, data) => {
+    const url = `/instructor/questions/${questionId}`;
+    return axiosClient.put(url, data);
+  },
+
+  // Xóa câu hỏi
+  deleteQuestion: (questionId) => {
+    const url = `/instructor/questions/${questionId}`;
+    return axiosClient.delete(url);
+  },
+
   // Lấy danh sách danh mục
   getCategories: () => {
     const url = '/categories';

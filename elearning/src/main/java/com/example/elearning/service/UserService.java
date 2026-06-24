@@ -16,7 +16,9 @@ public interface UserService {
 
     UserDetailResponseDto updateUserByAdmin(Long id, AdminUserUpdateRequestDto requestDto, String currentRole);
 
-    com.example.elearning.dto.response.UserStatsResponseDto getUserStats(String currentRole);
+    UserDetailResponseDto updateProfile(Long currentUserId, com.example.elearning.dto.request.UserProfileUpdateRequestDto requestDto);
+
+    com.example.elearning.dto.response.UserStatsResponseDto getUserStats(String currentRole, String startDate, String endDate);
 
     com.example.elearning.dto.response.StudentDashboardResponseDto getStudentDashboard(Long studentId);
 
