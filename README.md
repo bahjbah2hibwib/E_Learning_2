@@ -29,7 +29,7 @@ npm run dev
 - **Frontend (Web App):** http://localhost:5173 (or whatever port Vite uses)
 - **Backend API:** http://localhost:8088/api/v1
 - **MinIO Storage Console:** http://localhost:9001 (User: `admin` / Pass: `12345678`)
-- **phpMyAdmin (DB Client):** http://localhost:8081 (User: `root` / Pass: `123`)
+- **PGAdmin (DB Client):** http://localhost:8081 (User: `root` / Pass: `123`)
 
 ## Note on Missing Media (MinIO)
 When you first pull and run this project, the MinIO bucket will be empty, meaning that initial courses might have missing thumbnails or video files.
