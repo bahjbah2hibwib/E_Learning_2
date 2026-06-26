@@ -28,6 +28,7 @@ const UserListPage = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [onlineUserIds, setOnlineUserIds] = useState([]);
+  const [onlineCounts, setOnlineCounts] = useState({ students: 0, instructors: 0 });
 
   // --- C. Vòng đời và Hành động (Lifecycle & Actions) ---
   
@@ -76,13 +77,23 @@ const UserListPage = () => {
     // Lấy danh sách online ban đầu
     userService.getOnlineUsers().then(res => {
       if (res && res.success) {
-        setOnlineUserIds(res.data);
+        const onlineList = res.data || [];
+        setOnlineUserIds(onlineList.map(u => u.userId || u)); // Fallback if still IDs
+        setOnlineCounts({
+          students: onlineList.filter(u => u.role === 'ROLE_STUDENT').length,
+          instructors: onlineList.filter(u => u.role === 'ROLE_INSTRUCTOR').length
+        });
       }
     }).catch(err => console.log('Lỗi lấy online users', err));
 
     // Đăng ký nghe WebSocket
-    const unsubscribe = webSocketService.subscribe('/topic/online-users', (userIds) => {
-      setOnlineUserIds(userIds);
+    const unsubscribe = webSocketService.subscribe('/topic/online-users', (data) => {
+      const onlineList = data || [];
+      setOnlineUserIds(onlineList.map(u => u.userId || u));
+      setOnlineCounts({
+        students: onlineList.filter(u => u.role === 'ROLE_STUDENT').length,
+        instructors: onlineList.filter(u => u.role === 'ROLE_INSTRUCTOR').length
+      });
     });
 
     // Tự động refresh dữ liệu ngầm mỗi 5 giây
@@ -222,6 +233,7 @@ const UserListPage = () => {
       {/* Khối 2: 4 Thẻ thống kê */}
       <UserStatsCards 
         stats={statsData}
+        onlineCounts={onlineCounts}
         dateRange={dateRange}
         onDateRangeChange={(dates) => setDateRange(dates)}
       />

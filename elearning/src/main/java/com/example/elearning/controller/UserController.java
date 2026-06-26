@@ -209,7 +209,7 @@ public class UserController {
 
     @GetMapping("/online")
     public ResponseEntity<Map<String, Object>> getOnlineUsers() {
-        java.util.List<Long> onlineUsers = onlineUserManager.getOnlineUsers();
+        java.util.List<com.example.elearning.websocket.OnlineUserManager.OnlineUserInfo> onlineUsers = onlineUserManager.getOnlineUsers();
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Lấy danh sách online thành công");

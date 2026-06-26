@@ -49,9 +49,10 @@ const StatCard = ({ title, value, subtext, icon, iconBg, subtextColor = '#10b981
 );
 
 // Mảnh ghép gom 4 thẻ lại
-const UserStatsCards = ({ stats, dateRange, onDateRangeChange }) => {
+const UserStatsCards = ({ stats, onlineCounts, dateRange, onDateRangeChange }) => {
   // Bỏ dữ liệu fake theo yêu cầu. Nếu chưa có API, hiển thị "--"
   const data = stats || { totalStudents: '--', activeStudents: '--', totalInstructors: '--', newStudentsThisMonth: '--' };
+  const counts = onlineCounts || { students: 0, instructors: 0 };
 
   return (
     <Row gutter={[24, 24]} style={{ marginBottom: '24px', display: 'flex', alignItems: 'stretch' }}>
@@ -67,9 +68,16 @@ const UserStatsCards = ({ stats, dateRange, onDateRangeChange }) => {
       </Col>
       <Col xs={24} sm={12} lg={6}>
         <StatCard 
-          title="Học viên hoạt động" 
-          value={data.activeStudents} 
-          subtext="Tài khoản học viên không bị khóa"
+          title="ĐANG HOẠT ĐỘNG" 
+          value={
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              <span style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b' }}>{counts.students || 0}</span>
+              <span style={{ fontSize: '13px', fontWeight: 500, color: '#64748b', marginRight: '8px' }}>Học viên</span>
+              <span style={{ fontSize: '24px', fontWeight: 700, color: '#1e293b' }}>{counts.instructors || 0}</span>
+              <span style={{ fontSize: '13px', fontWeight: 500, color: '#64748b' }}>Giảng viên</span>
+            </div>
+          } 
+          subtext="Đang online ngay bây giờ"
           subtextColor="#10b981"
           icon={<UserOutlined style={{ color: '#8b5cf6' }} />} 
           iconBg="#ede9fe" 

@@ -18,6 +18,7 @@ public class WebSocketEventListener {
 
     private final OnlineUserManager onlineUserManager;
     private final SimpMessageSendingOperations messagingTemplate;
+    private final com.example.elearning.repository.UserRepository userRepository;
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
@@ -35,7 +36,12 @@ public class WebSocketEventListener {
                 String sessionId = (String) event.getMessage().getHeaders().get("simpSessionId");
                 
                 if (sessionId != null) {
-                    onlineUserManager.addUser(sessionId, userId);
+                    // Lấy role từ DB
+                    String role = userRepository.findById(userId)
+                            .map(u -> u.getRole().name())
+                            .orElse("UNKNOWN");
+                            
+                    onlineUserManager.addUser(sessionId, userId, role);
                     broadcastOnlineUsers();
                 }
             } catch (Exception e) {
