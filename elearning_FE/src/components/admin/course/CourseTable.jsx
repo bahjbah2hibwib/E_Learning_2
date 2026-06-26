@@ -212,17 +212,35 @@ const CourseTable = ({
       ...getColumnSearchProps("title", "tên khóa học"),
       render: (text, record) => (
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <Avatar
-            shape="square"
-            src={record.thumbnailUrl}
-            size={40}
-            style={{
-              backgroundColor: "#e2e8f0",
-              color: "#475569",
-              borderRadius: "6px",
-            }}
-            icon={!record.thumbnailUrl && <PictureOutlined />}
-          />
+          {record.thumbnailUrl ? (
+            <img
+              src={record.thumbnailUrl}
+              alt="Course Thumbnail"
+              style={{
+                width: "72px",
+                height: "40px",
+                objectFit: "cover",
+                backgroundColor: "#e2e8f0",
+                borderRadius: "4px",
+                border: "1px solid #e2e8f0"
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "72px",
+                height: "40px",
+                backgroundColor: "#e2e8f0",
+                borderRadius: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#94a3b8"
+              }}
+            >
+              <PictureOutlined />
+            </div>
+          )}
           <Text style={{ fontWeight: 600, color: "#1e293b" }}>
             {text?.length > 40 ? text.substring(0, 40) + "..." : text}
           </Text>
