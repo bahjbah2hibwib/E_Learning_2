@@ -37,4 +37,3 @@ elearning_FE/.env.production.local
 # If you have local volume data you want to ignore, add them here
 # mysql_data/
 # minio_data/
-minio_data/.minio.sys/
