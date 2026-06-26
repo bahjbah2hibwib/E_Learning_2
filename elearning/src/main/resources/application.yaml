@@ -11,10 +11,10 @@ spring:
       max-request-size: 100MB
   
   datasource:
-    url: "jdbc:mysql://localhost:3307/elearning?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+    url: "jdbc:postgresql://localhost:5432/elearning?currentSchema=elearning&TimeZone=Asia/Ho_Chi_Minh&stringtype=unspecified"
     username: elearning_user
-    password: 123
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: "123"
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -23,7 +23,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   sql:
     init:

@@ -18,18 +18,18 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     java.util.List<Payment> findByStudent_UserId(Long studentId);
 
     @Query(value = "SELECT p FROM Payment p JOIN FETCH p.student s JOIN FETCH p.course c WHERE " +
-           "(:status IS NULL OR p.paymentStatus = :status) AND " +
-           "(:keyword IS NULL OR LOWER(p.transactionCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
-           "(:startDate IS NULL OR p.createdAt >= :startDate) AND " +
-           "(:endDate IS NULL OR p.createdAt <= :endDate)",
+           "(p.paymentStatus IN :statuses) AND " +
+           "(:keyword = '' OR LOWER(p.transactionCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(p.createdAt >= :startDate) AND " +
+           "(p.createdAt <= :endDate)",
            countQuery = "SELECT count(p) FROM Payment p JOIN p.student s JOIN p.course c WHERE " +
-           "(:status IS NULL OR p.paymentStatus = :status) AND " +
-           "(:keyword IS NULL OR LOWER(p.transactionCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
-           "(:startDate IS NULL OR p.createdAt >= :startDate) AND " +
-           "(:endDate IS NULL OR p.createdAt <= :endDate)")
-    Page<Payment> searchPayments(@Param("keyword") String keyword, @Param("status") PaymentStatus status, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+           "(p.paymentStatus IN :statuses) AND " +
+           "(:keyword = '' OR LOWER(p.transactionCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(p.createdAt >= :startDate) AND " +
+           "(p.createdAt <= :endDate)")
+    Page<Payment> searchPayments(@Param("keyword") String keyword, @Param("statuses") java.util.List<PaymentStatus> statuses, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.paymentStatus = 'SUCCESS'")
+    @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.paymentStatus = 'SUCCESS'")
     java.math.BigDecimal calculateTotalRevenue();
 
     long countByPaymentStatus(PaymentStatus status);

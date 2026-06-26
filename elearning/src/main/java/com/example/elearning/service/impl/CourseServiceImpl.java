@@ -86,10 +86,12 @@ public class CourseServiceImpl implements CourseService {
             }
         }
 
-        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+        java.util.List<CourseStatus> statuses = (statusEnum != null) ? java.util.Collections.singletonList(statusEnum) : java.util.Arrays.asList(CourseStatus.values());
+
+        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : "";
 
         // Bước 3: Tìm kiếm trong DB
-        Page<Course> coursePage = courseRepository.searchAdminCourses(null, statusEnum, searchKeyword, pageable);
+        Page<Course> coursePage = courseRepository.searchAdminCourses(0L, statuses, searchKeyword, pageable);
 
         // Bước 4: Ánh xạ kết quả sang DTO
         List<CourseAdminItemDto> content = coursePage.getContent().stream()
@@ -137,9 +139,10 @@ public class CourseServiceImpl implements CourseService {
     @Cacheable(value = "publicCourses", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '')")
     public PageResponseDto<CourseAdminItemDto> getPublicCourses(int page, int size, String keyword) {
         Pageable pageable = PageRequest.of(page, size);
-        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : "";
+        java.util.List<CourseStatus> statuses = java.util.Collections.singletonList(CourseStatus.APPROVED);
 
-        Page<Course> coursePage = courseRepository.searchAdminCourses(null, CourseStatus.APPROVED, searchKeyword, pageable);
+        Page<Course> coursePage = courseRepository.searchAdminCourses(0L, statuses, searchKeyword, pageable);
 
         List<CourseAdminItemDto> content = coursePage.getContent().stream()
                 .map(course -> {
@@ -438,9 +441,10 @@ public class CourseServiceImpl implements CourseService {
             }
         }
 
-        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+        java.util.List<CourseStatus> statuses = (statusEnum != null) ? java.util.Collections.singletonList(statusEnum) : java.util.Arrays.asList(CourseStatus.values());
+        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : "";
 
-        Page<Course> coursePage = courseRepository.searchAdminCourses(instructorId, statusEnum, searchKeyword, pageable);
+        Page<Course> coursePage = courseRepository.searchAdminCourses(instructorId, statuses, searchKeyword, pageable);
 
         List<CourseAdminItemDto> content = coursePage.getContent().stream()
                 .map(course -> {

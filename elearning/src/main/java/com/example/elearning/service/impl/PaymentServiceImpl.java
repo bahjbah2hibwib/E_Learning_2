@@ -57,13 +57,14 @@ public class PaymentServiceImpl implements PaymentService {
                 // Bỏ qua nếu ko hợp lệ
             }
         }
+        java.util.List<PaymentStatus> statuses = (statusEnum != null) ? java.util.Collections.singletonList(statusEnum) : java.util.Arrays.asList(PaymentStatus.values());
 
         // Keyword
-        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : "";
 
         // Ngày bắt đầu / kết thúc
-        LocalDateTime startDateTime = null;
-        LocalDateTime endDateTime = null;
+        LocalDateTime startDateTime = LocalDateTime.of(1970, 1, 1, 0, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2999, 12, 31, 23, 59, 59);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         try {
@@ -78,7 +79,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         // Truy vấn DB
-        Page<Payment> paymentPage = paymentRepository.searchPayments(searchKeyword, statusEnum, startDateTime, endDateTime, pageable);
+        Page<Payment> paymentPage = paymentRepository.searchPayments(searchKeyword, statuses, startDateTime, endDateTime, pageable);
 
         // Map sang DTO
         List<PaymentAdminItemDto> content = paymentPage.getContent().stream()
@@ -104,6 +105,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         BigDecimal totalRevenue = paymentRepository.calculateTotalRevenue();
+        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
         long successCount = paymentRepository.countByPaymentStatus(PaymentStatus.SUCCESS);
         long pendingCount = paymentRepository.countByPaymentStatus(PaymentStatus.PENDING);
         long refundedCount = paymentRepository.countByPaymentStatus(PaymentStatus.REFUNDED);

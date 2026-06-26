@@ -2,27 +2,25 @@ version: '3.8'
 
 services:
   db:
-    image: mysql:8.0
-    container_name: mysql_db
+    image: postgres:15
+    container_name: postgres_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
     restart: always
     environment:
-      PMA_HOST: db
-      PMA_USER: root
-      PMA_PASSWORD: ${DB_ROOT_PASSWORD}
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
       - "8081:80"
     depends_on:
@@ -56,7 +54,7 @@ services:
     container_name: spring_backend
     restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}?currentSchema=${DB_NAME}&stringtype=unspecified
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       MINIO_URL: http://minio:9000

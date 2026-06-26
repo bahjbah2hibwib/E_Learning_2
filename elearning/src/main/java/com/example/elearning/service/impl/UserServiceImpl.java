@@ -80,10 +80,12 @@ public class UserServiceImpl implements UserService {
         }
 
         // Xử lý keyword: nếu chuỗi rỗng thì cho thành null để SQL dễ bắt
-        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+        java.util.List<UserRole> roles = (roleEnum != null) ? java.util.Collections.singletonList(roleEnum) : java.util.Arrays.asList(UserRole.values());
+        java.util.List<Boolean> statuses = (status != null) ? java.util.Collections.singletonList(status) : java.util.Arrays.asList(true, false);
+        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : "";
 
         // Step 2: Tìm kiếm & Phân trang trong DB
-        Page<User> userPage = userRepository.searchUsers(searchKeyword, roleEnum, status, pageable);
+        Page<User> userPage = userRepository.searchUsers(searchKeyword, roles, statuses, pageable);
 
         // Step 3: Mapping kết quả sang DTO
         List<UserItemResponseDto> content = userPage.getContent().stream()

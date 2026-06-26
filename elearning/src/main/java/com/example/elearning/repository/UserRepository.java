@@ -28,11 +28,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     java.util.List<User> findByRole(UserRole role);
 
     @Query("SELECT u FROM User u WHERE " +
-           "(:keyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR u.email LIKE CONCAT('%', :keyword, '%') OR u.phone LIKE CONCAT('%', :keyword, '%')) " +
-           "AND (:role IS NULL OR u.role = :role) " +
-           "AND (:status IS NULL OR u.status = :status)")
+           "(:keyword = '' OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR u.email LIKE CONCAT('%', :keyword, '%') OR u.phone LIKE CONCAT('%', :keyword, '%')) " +
+           "AND (u.role IN :roles) " +
+           "AND (u.status IN :statuses)")
     Page<User> searchUsers(@Param("keyword") String keyword, 
-                           @Param("role") UserRole role, 
-                           @Param("status") Boolean status, 
+                           @Param("roles") java.util.List<UserRole> roles, 
+                           @Param("statuses") java.util.List<Boolean> statuses, 
                            Pageable pageable);
 }

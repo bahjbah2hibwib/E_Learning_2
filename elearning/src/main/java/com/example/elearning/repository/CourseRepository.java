@@ -14,10 +14,10 @@ import org.springframework.data.repository.query.Param;
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT c FROM Course c JOIN FETCH c.instructor i LEFT JOIN FETCH c.thumbnailFile f WHERE " +
-           "(:instructorId IS NULL OR i.userId = :instructorId) AND " +
-           "(:status IS NULL OR c.status = :status) AND " +
-           "(:keyword IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Course> searchAdminCourses(@Param("instructorId") Long instructorId, @Param("status") CourseStatus status, @Param("keyword") String keyword, Pageable pageable);
+           "(:instructorId = 0L OR i.userId = :instructorId) AND " +
+           "(c.status IN :statuses) AND " +
+           "(:keyword = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Course> searchAdminCourses(@Param("instructorId") Long instructorId, @Param("statuses") java.util.List<CourseStatus> statuses, @Param("keyword") String keyword, Pageable pageable);
 
     long countByInstructor_UserId(Long userId);
     
